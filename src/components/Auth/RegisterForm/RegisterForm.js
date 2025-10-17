@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import styles from './RegisterForm.module.css';
-import { useAuth } from '../../../hooks/useAuth'; // 🔥 ДОБАВИЛИ ИМПОРТ ХУКА
+import { useAuth } from '../../../hooks/useAuth';
 
 const RegisterForm = ({ onSwitchToLogin }) => {
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
+    username: '',
     email: '',
+    phone: '',
     password: '',
     confirmPassword: ''
   });
@@ -14,20 +14,23 @@ const RegisterForm = ({ onSwitchToLogin }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
 
-  const { login } = useAuth(); // 🔥 ИСПОЛЬЗУЕМ ХУК АВТОРИЗАЦИИ
+  const { register } = useAuth();
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+    const { name, value } = e.target;
+    setFormData(prevData => ({
+      ...prevData,
+      [name]: value
+    }));
+    
     // Очищаем ошибку при изменении поля
-    if (errors[e.target.name]) {
-      setErrors({
-        ...errors,
-        [e.target.name]: ''
-      });
+    if (errors[name]) {
+      setErrors(prevErrors => ({
+        ...prevErrors,
+        [name]: ''
+      }));
     }
+    
     // Очищаем сообщение об успехе при новом вводе
     if (successMessage) {
       setSuccessMessage('');
@@ -37,24 +40,27 @@ const RegisterForm = ({ onSwitchToLogin }) => {
   const validateForm = () => {
     const newErrors = {};
 
-    if (!formData.firstName.trim()) {
-      newErrors.firstName = 'Имя обязательно';
+    if (!formData.username.trim()) {
+      newErrors.username = 'Имя пользователя обязательно';
     }
 
-    if (!formData.lastName.trim()) {
-      newErrors.lastName = 'Фамилия обязательна';
+    // Either email or phone must be provided
+    if (!formData.email.trim() && !formData.phone.trim()) {
+      newErrors.contact = 'Необходимо указать email или номер телефона';
     }
 
-    if (!formData.email.trim()) {
-      newErrors.email = 'Email обязателен';
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+    if (formData.email.trim() && !/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = 'Некорректный email';
+    }
+
+    if (formData.phone.trim() && !/^\+?[\d\s\-\(\)]+$/.test(formData.phone)) {
+      newErrors.phone = 'Некорректный номер телефона';
     }
 
     if (!formData.password) {
       newErrors.password = 'Пароль обязателен';
-    } else if (formData.password.length < 6) {
-      newErrors.password = 'Пароль должен быть не менее 6 символов';
+    } else if (formData.password.length < 8) {
+      newErrors.password = 'Пароль должен быть не менее 8 символов';
     }
 
     if (formData.password !== formData.confirmPassword) {
@@ -62,26 +68,6 @@ const RegisterForm = ({ onSwitchToLogin }) => {
     }
 
     return newErrors;
-  };
-
-  // 🟢 ФУНКЦИЯ-ЗАГЛУШКА ДЛЯ ТЕСТИРОВАНИЯ (если бэкенд не готов)
-  const mockRegisterAPI = (userData) => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        // Имитация успешной регистрации
-        resolve({
-          success: true,
-          message: `Регистрация успешна! Добро пожаловать, ${userData.firstName}!`,
-          token: 'mock_jwt_token_' + Date.now(),
-          user: {
-            id: Date.now(),
-            email: userData.email,
-            firstName: userData.firstName,
-            lastName: userData.lastName
-          }
-        });
-      }, 1000);
-    });
   };
 
   const handleSubmit = async (e) => {
@@ -98,88 +84,68 @@ const RegisterForm = ({ onSwitchToLogin }) => {
     setSuccessMessage('');
 
     try {
-      const userData = {
-        firstName: formData.firstName.trim(),
-        lastName: formData.lastName.trim(),
-        email: formData.email.trim(),
-        password: formData.password
-      };
-
-      console.log('📨 Отправляем данные:', userData);
-
-      // 🟢 ВРЕМЕННО ИСПОЛЬЗУЕМ ЗАГЛУШКУ (когда бэкенд готов - закомментируйте эту строку)
-      const result = await mockRegisterAPI(userData);
-
-      // 🔥 КОГДА БЭКЕНД ГОТОВ - РАСКОММЕНТИРУЙТЕ ЭТОТ БЛОК:
-      /*
-      const response = await fetch('http://localhost:3001/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(userData)
+      console.log('📨 Отправляем данные:', { 
+        username: formData.username, 
+        email: formData.email || null, 
+        phone: formData.phone || null, 
+        password: formData.password 
       });
 
-      console.log('📩 Ответ сервера:', {
-        status: response.status,
-        ok: response.ok,
-        statusText: response.statusText
-      });
+      const result = await register(
+        formData.username, 
+        formData.password, 
+        formData.email || null, 
+        formData.phone || null
+      );
 
-      const result = await response.json();
-      console.log('📊 Данные ответа:', result);
-      */
-
-      // ОБРАБОТКА ОТВЕТА ОТ СЕРВЕРА
-      if (result.success) { // 🔥 ИЗМЕНИЛИ УСЛОВИЕ (response.ok && result.success → result.success)
+      if (result.success) {
         // ✅ УСПЕШНАЯ РЕГИСТРАЦИЯ
         console.log('✅ Регистрация успешна:', result);
         
-        // 🔐 СОХРАНЯЕМ ТОКЕН И ВХОДИМ ЧЕРЕЗ ХУК
-        if (result.token) {
-          login(result.token, result.user); // 🔥 ВХОДИМ В СИСТЕМУ
+        if (result.requiresVerification) {
+          setSuccessMessage('Регистрация успешна! Проверьте ваш email для подтверждения.');
+        } else {
+          setSuccessMessage('Регистрация успешна! Добро пожаловать!');
+          
+          // Сброс формы
+          setFormData({
+            username: '',
+            email: '',
+            phone: '',
+            password: '',
+            confirmPassword: ''
+          });
+          
+          // РЕДИРЕКТ
+          setTimeout(() => {
+            window.location.href = '/';
+          }, 2000);
         }
-        
-        setSuccessMessage(result.message || 'Регистрация успешна!');
-        
-        // Сброс формы
-        setFormData({
-          firstName: '',
-          lastName: '',
-          email: '',
-          password: '',
-          confirmPassword: ''
-        });
-        
-        // РЕДИРЕКТ
-        setTimeout(() => {
-          window.location.href = '/';
-        }, 2000);
 
       } else {
         // ❌ ОШИБКА ОТ СЕРВЕРА
         console.log('❌ Ошибка регистрации:', result);
         
         // Обработка разных типов ошибок
-        if (result.message && result.message.toLowerCase().includes('email')) {
+        if (result.error && result.error.toLowerCase().includes('email')) {
           setErrors({ 
-            email: result.message,
-            submit: result.message 
+            email: result.error,
+            submit: result.error 
           });
-        } else if (result.message && result.message.toLowerCase().includes('пароль')) {
+        } else if (result.error && result.error.toLowerCase().includes('пароль')) {
           setErrors({ 
-            password: result.message,
-            submit: result.message 
+            password: result.error,
+            submit: result.error 
           });
         } else {
           setErrors({ 
-            submit: result.message || 'Произошла ошибка при регистрации' 
+            submit: result.error || 'Произошла ошибка при регистрации' 
           });
         }
       }
 
     } catch (error) {
-      // ❌ ОШИБКА СЕТИ ИЛИ ПАРСИНГА
+      // ❌ ОШИБКА СЕТЯ ИЛИ ПАРСИНГА
       console.error('🚫 Сетевая ошибка:', error);
       setErrors({ 
         submit: 'Ошибка соединения с сервером. Проверьте интернет и попробуйте снова.' 
@@ -198,39 +164,23 @@ const RegisterForm = ({ onSwitchToLogin }) => {
         </div>
       )}
 
-      <div className={styles.nameFields}>
-        <div className={styles.inputGroup}>
-          <label className={styles.label}>Имя</label>
-          <input
-            type="text"
-            name="firstName"
-            className={`${styles.input} ${errors.firstName ? styles.error : ''}`}
-            value={formData.firstName}
-            onChange={handleChange}
-            placeholder="Имя"
-            required
-            disabled={isLoading}
-          />
-          {errors.firstName && <span className={styles.errorText}>{errors.firstName}</span>}
-        </div>
-        <div className={styles.inputGroup}>
-          <label className={styles.label}>Фамилия</label>
-          <input
-            type="text"
-            name="lastName"
-            className={`${styles.input} ${errors.lastName ? styles.error : ''}`}
-            value={formData.lastName}
-            onChange={handleChange}
-            placeholder="Фамилия"
-            required
-            disabled={isLoading}
-          />
-          {errors.lastName && <span className={styles.errorText}>{errors.lastName}</span>}
-        </div>
+      <div className={styles.inputGroup}>
+        <label className={styles.label}>Имя пользователя</label>
+        <input
+          type="text"
+          name="username"
+          className={`${styles.input} ${errors.username ? styles.error : ''}`}
+          value={formData.username}
+          onChange={handleChange}
+          placeholder="Введите имя пользователя"
+          required
+          disabled={isLoading}
+        />
+        {errors.username && <span className={styles.errorText}>{errors.username}</span>}
       </div>
 
       <div className={styles.inputGroup}>
-        <label className={styles.label}>Email</label>
+        <label className={styles.label}>Email (опционально)</label>
         <input
           type="email"
           name="email"
@@ -238,11 +188,26 @@ const RegisterForm = ({ onSwitchToLogin }) => {
           value={formData.email}
           onChange={handleChange}
           placeholder="Введите ваш email"
-          required
           disabled={isLoading}
         />
         {errors.email && <span className={styles.errorText}>{errors.email}</span>}
       </div>
+
+      <div className={styles.inputGroup}>
+        <label className={styles.label}>Телефон (опционально)</label>
+        <input
+          type="tel"
+          name="phone"
+          className={`${styles.input} ${errors.phone ? styles.error : ''}`}
+          value={formData.phone}
+          onChange={handleChange}
+          placeholder="Введите номер телефона"
+          disabled={isLoading}
+        />
+        {errors.phone && <span className={styles.errorText}>{errors.phone}</span>}
+      </div>
+
+      {(errors.contact) && <span className={styles.errorText}>{errors.contact}</span>}
 
       <div className={styles.inputGroup}>
         <label className={styles.label}>Пароль</label>
@@ -252,7 +217,7 @@ const RegisterForm = ({ onSwitchToLogin }) => {
           className={`${styles.input} ${errors.password ? styles.error : ''}`}
           value={formData.password}
           onChange={handleChange}
-          placeholder="Создайте пароль"
+          placeholder="Создайте пароль (минимум 8 символов)"
           required
           disabled={isLoading}
         />
