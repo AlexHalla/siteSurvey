@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../../hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
 import styles from './LoginForm.module.css';
+import { ROUTES } from '../../../config/routes';
 
 const LoginForm = ({ onSwitchToRegister }) => {
   const [formData, setFormData] = useState({
@@ -11,6 +13,7 @@ const LoginForm = ({ onSwitchToRegister }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const { login } = useAuth();
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({
@@ -69,7 +72,7 @@ const LoginForm = ({ onSwitchToRegister }) => {
         // 🎯 ПЕРЕНАПРАВЛЕНИЕ НА ГЛАВНУЮ
         setTimeout(() => {
           console.log('🔄 Перенаправляем на главную страницу...');
-          window.location.href = '/';
+          navigate(ROUTES.HOME);
         }, 1500);
 
       } else {

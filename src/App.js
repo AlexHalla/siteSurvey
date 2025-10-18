@@ -8,6 +8,7 @@ import Login from './pages/Login';
 import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute';
 import './App.css';
 import Profile from './pages/Profile';
+import { ROUTES } from './config/routes';
 
 function App() {
   return (
@@ -16,10 +17,10 @@ function App() {
         <Header />
         <main>
           <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/login" element={<Login />} />
+            <Route path={ROUTES.HOME} element={<Home />} />
+            <Route path={ROUTES.LOGIN} element={<Login />} />
             <Route 
-              path="/articles" 
+              path={ROUTES.ARTICLES} 
               element={
                 <ProtectedRoute>
                   <Articles />
@@ -27,7 +28,7 @@ function App() {
               } 
             />
             <Route 
-              path="/tests" 
+              path={ROUTES.TESTS} 
               element={
                 <ProtectedRoute>
                   <Tests />
@@ -35,7 +36,7 @@ function App() {
               } 
             />
             <Route 
-              path="/profile" 
+              path={ROUTES.PROFILE} 
               element={
                 <ProtectedRoute>
                   <Profile />

@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import styles from './RegisterForm.module.css';
 import { useAuth } from '../../../hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
+import { ROUTES } from '../../../config/routes';
 
 const RegisterForm = ({ onSwitchToLogin }) => {
   const [formData, setFormData] = useState({
@@ -15,6 +17,7 @@ const RegisterForm = ({ onSwitchToLogin }) => {
   const [successMessage, setSuccessMessage] = useState('');
 
   const { register } = useAuth();
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -118,7 +121,7 @@ const RegisterForm = ({ onSwitchToLogin }) => {
           
           // РЕДИРЕКТ
           setTimeout(() => {
-            window.location.href = '/';
+            navigate(ROUTES.HOME);
           }, 2000);
         }
 

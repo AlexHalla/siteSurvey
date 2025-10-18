@@ -2,6 +2,7 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import styles from './Header.module.css';
+import { ROUTES } from '../../config/routes';
 
 const Header = () => {
   const { isAuthenticated, user, logout } = useAuth();
@@ -9,28 +10,28 @@ const Header = () => {
 
   const handleLogout = () => {
     logout();
-    navigate('/');
+    navigate(ROUTES.HOME);
   };
 
   const handleProfileClick = () => {
-    navigate('/profile');
+    navigate(ROUTES.PROFILE);
   };
 
   return (
     <header className={styles.header}>
       <nav className={styles.nav}>
         <div className={styles.logo}>
-          <Link to="/">Мой Сайт</Link>
+          <Link to={ROUTES.HOME}>Мой Сайт</Link>
         </div>
         <ul className={styles.navList}>
           <li>
-            <Link to="/" className={styles.navLink}>Главная</Link>
+            <Link to={ROUTES.HOME} className={styles.navLink}>Главная</Link>
           </li>
           <li>
-            <Link to="/articles" className={styles.navLink}>Статьи</Link>
+            <Link to={ROUTES.ARTICLES} className={styles.navLink}>Статьи</Link>
           </li>
           <li>
-            <Link to="/tests" className={styles.navLink}>Тесты</Link>
+            <Link to={ROUTES.TESTS} className={styles.navLink}>Тесты</Link>
           </li>
         </ul>
         <div className={styles.auth}>
@@ -50,7 +51,7 @@ const Header = () => {
               </button>
             </div>
           ) : (
-            <Link to="/login" className={styles.loginButton}>
+            <Link to={ROUTES.LOGIN} className={styles.loginButton}>
               Войти
             </Link>
           )}
