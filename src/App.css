@@ -1,5 +1,34 @@
 .App {
-  text-align: center;
+  min-height: 100vh;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* Фоны для разных страниц */
+.defaultBackground {
+  background-color: #9c4a9f;
+}
+
+.loginBackground {
+  background-image: url('/public/assets/login_background.png'); /* путь из public */
+}
+
+.articlesBackground {
+  background-image: url('/public/assets/background.png');
+}
+
+.homeBackground {
+  background-image: url('/public/assets/background.png');
+}
+
+
+.testsBackground {
+  background-image: url('/public/assets/background.png');
+}
+
+.profileBackground {
+  background-image: url('/public/assets/background.png');
 }
 
 .App-logo {

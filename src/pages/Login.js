@@ -10,16 +10,7 @@ const Login = () => {
     <div className={styles.loginPage}>
       <div className={styles.loginContainer}>
         <div className={styles.logo}>
-          <h2>Мой Сайт</h2>
-        </div>
-        
-        <div className={styles.card}>
-          <h1 className={styles.title}>
-            {isLogin ? 'Войти' : 'Создать аккаунт'}
-          </h1>
-          <p className={styles.subtitle}>
-            {isLogin ? 'Продолжить работу с Мой Сайт' : 'Зарегистрироваться в Мой Сайт'}
-          </p>
+         
 
           {isLogin ? (
             <LoginForm onSwitchToRegister={() => setIsLogin(false)} />

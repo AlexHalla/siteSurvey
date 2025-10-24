@@ -1,15 +1,16 @@
 .loginPage {
-  min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #f8f9fa;
+  height: calc(100vh - 70px);
   padding: 20px;
+  box-sizing: border-box;
 }
 
 .loginContainer {
   width: 100%;
   max-width: 450px;
+  margin-left: 33.33vw;
 }
 
 .logo {
@@ -23,12 +24,6 @@
   margin: 0;
 }
 
-.card {
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  padding: 40px;
-}
 
 .title {
   font-size: 24px;

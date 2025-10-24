@@ -1,5 +1,27 @@
 .form {
   width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+  background: rgba(45, 20, 90, 0.45); 
+  backdrop-filter: blur(18px) saturate(180%);
+  -webkit-backdrop-filter: blur(18px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 24px;
+  padding: 40px 36px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+  color: #fff;
+  animation: fadeIn 0.6s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .nameFields {
@@ -9,29 +31,48 @@
 }
 
 .inputGroup {
-  margin-bottom: 20px;
+  margin-bottom: 22px;
 }
 
 .label {
   display: block;
   margin-bottom: 8px;
   font-size: 14px;
-  color: #3c4043;
+  color: #ffffff;
   font-weight: 500;
 }
 
 .input {
   width: 100%;
-  padding: 13px 15px;
-  border: 1px solid #dadce0;
-  border-radius: 4px;
-  font-size: 16px;
-  transition: border 0.3s ease;
+  padding: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 12px;
+  font-size: 15px;
+  background: #4d3775; 
+  color: #fff;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+}
+
+.input::placeholder {
+  color: rgba(255, 255, 255, 0.6);
 }
 
 .input:focus {
   outline: none;
-  border-color: #1a73e8;
+  border-color: #b47cff;
+  box-shadow: 0 0 10px rgba(180, 124, 255, 0.5);
+  background: #3a1f73; 
+}
+
+.input.error {
+  border-color: #ff6b81;
+  box-shadow: 0 0 8px rgba(255, 80, 120, 0.4);
+}
+
+.input:disabled {
+  background: #4b2e8f;
+  cursor: not-allowed;
 }
 
 .options {
@@ -43,60 +84,64 @@
 .link {
   background: none;
   border: none;
-  color: #1a73e8;
+  color: #ffffff;
   cursor: pointer;
   font-size: 14px;
-  padding: 0;
+  transition: color 0.3s ease;
 }
 
 .link:hover {
+  color: #e2ccff;
   text-decoration: underline;
+}
+
+.link:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .buttons {
   display: flex;
-  flex-direction: column;
-  gap: 10px;
+  flex-direction: column-reverse;
+  gap: 12px;
 }
 
 .registerButton {
-  background-color: #1a73e8;
-  color: white;
+  background: linear-gradient(135deg, #7b2cbf, #9d4edd);
+  color: #fff;
   border: none;
-  padding: 12px 24px;
-  border-radius: 4px;
-  font-size: 14px;
-  font-weight: 500;
+  padding: 14px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: all 0.3s ease;
 }
 
 .registerButton:hover {
-  background-color: #1669d6;
+  background: linear-gradient(135deg, #9d4edd, #b26fff);
+  box-shadow: 0 0 15px rgba(180, 124, 255, 0.5);
 }
 
-.error {
-  border-color: #d93025 !important;
+.registerButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .errorText {
-  color: #d93025;
+  color: #ff8fa3;
   font-size: 12px;
-  margin-top: 4px;
+  margin-top: 5px;
   display: block;
 }
 
 .submitError {
-  background-color: #fce8e6;
-  color: #d93025;
+  background: rgba(255, 80, 120, 0.25);
+  color: #ffc4d0;
   padding: 12px;
-  border-radius: 4px;
+  border-radius: 12px;
   margin-bottom: 20px;
   text-align: center;
   font-size: 14px;
-}
-
-.registerButton:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+  border: 1px solid rgba(255, 120, 150, 0.4);
 }
