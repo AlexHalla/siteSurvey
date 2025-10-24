@@ -24,7 +24,6 @@
   margin: 0;
 }
 
-
 .title {
   font-size: 24px;
   font-weight: 400;
@@ -38,4 +37,56 @@
   color: #5f6368;
   margin: 0 0 30px 0;
   font-size: 16px;
+}
+
+/* Mobile styles */
+@media (max-width: 768px) {
+  .loginPage {
+    height: auto;
+    min-height: calc(100vh - 60px);
+    padding: 15px;
+  }
+  
+  .loginContainer {
+    margin-left: 0;
+    max-width: 100%;
+  }
+  
+  .logo h2 {
+    font-size: 1.7rem;
+  }
+  
+  .title {
+    font-size: 22px;
+  }
+  
+  .subtitle {
+    font-size: 15px;
+    margin: 0 0 25px 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .loginPage {
+    padding: 10px;
+    align-items: flex-start;
+    padding-top: 20px;
+  }
+  
+  .logo {
+    margin-bottom: 30px;
+  }
+  
+  .logo h2 {
+    font-size: 1.5rem;
+  }
+  
+  .title {
+    font-size: 20px;
+  }
+  
+  .subtitle {
+    font-size: 14px;
+    margin: 0 0 20px 0;
+  }
 }

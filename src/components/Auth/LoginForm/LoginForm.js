@@ -32,7 +32,7 @@ const LoginForm = ({ onSwitchToRegister }) => {
     const newErrors = {};
 
     if (!formData.identifier.trim()) {
-      newErrors.identifier = 'Email, телефон или имя пользователя обязательно';
+      newErrors.identifier = 'Email или телефон';
     }
 
     if (!formData.password) {
@@ -100,7 +100,7 @@ const LoginForm = ({ onSwitchToRegister }) => {
           className={`${styles.input} ${errors.identifier ? styles.error : ''}`}
           value={formData.identifier}
           onChange={handleChange}
-          placeholder="Введите email, телефон или имя пользователя"
+          placeholder="Введите email или телефон"
           required
           disabled={isLoading}
         />

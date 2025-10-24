@@ -22,7 +22,6 @@
   background-image: url('/public/assets/background.png');
 }
 
-
 .testsBackground {
   background-image: url('/public/assets/background.png');
 }
@@ -63,5 +62,25 @@
   }
   to {
     transform: rotate(360deg);
+  }
+}
+
+/* Mobile styles */
+@media (max-width: 768px) {
+  .App {
+    background-size: cover;
+    background-position: center top;
+  }
+}
+
+@media (max-width: 480px) {
+  .App {
+    background-size: cover;
+    background-position: center top;
+  }
+  
+  .App-header {
+    padding: 10px;
+    font-size: calc(8px + 2vmin);
   }
 }

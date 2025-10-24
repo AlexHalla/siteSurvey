@@ -174,3 +174,67 @@
   background: #4b2e8f; /* тёмный для disabled */
   cursor: not-allowed;
 }
+
+/* Mobile styles */
+@media (max-width: 768px) {
+  .form {
+    padding: 30px 24px;
+    border-radius: 20px;
+  }
+  
+  .input {
+    padding: 12px;
+    font-size: 16px; /* Better for mobile typing */
+  }
+  
+  .loginButton, .createAccount {
+    padding: 12px;
+    font-size: 16px;
+  }
+  
+  .label {
+    font-size: 15px;
+  }
+  
+  .link {
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .form {
+    padding: 25px 20px;
+    border-radius: 16px;
+  }
+  
+  .inputGroup {
+    margin-bottom: 18px;
+  }
+  
+  .input {
+    padding: 10px;
+    font-size: 16px;
+  }
+  
+  .label {
+    font-size: 14px;
+    margin-bottom: 6px;
+  }
+  
+  .options {
+    margin-bottom: 25px;
+  }
+  
+  .link {
+    font-size: 14px;
+  }
+  
+  .buttons {
+    gap: 10px;
+  }
+  
+  .loginButton, .createAccount {
+    padding: 10px;
+    font-size: 15px;
+  }
+}
