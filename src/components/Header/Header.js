@@ -55,7 +55,7 @@ const Header = () => {
       <nav className={styles.nav}>
         <div className={styles.logo}>
           <Link to="/" onClick={(e) => { e.preventDefault(); handleHomeClick(); }}>
-            Мой Сайт
+            Психолино
           </Link>
         </div>
         

@@ -1,58 +1,40 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../hooks/useAuth';
+import ProfileForm from '../components/Profile/ProfileForm';
 
 const Profile = () => {
+  const { user } = useAuth();
+  const [background, setBackground] = useState(null);
+
+  useEffect(() => {
+    // Load saved background from localStorage
+    const savedBackground = localStorage.getItem('profileBackground');
+    if (savedBackground) {
+      setBackground(savedBackground);
+    }
+
+    // Listen for background change events
+    const handleBackgroundChange = (event) => {
+      setBackground(event.detail);
+    };
+
+    window.addEventListener('backgroundChange', handleBackgroundChange);
+
+    // Cleanup event listener
+    return () => {
+      window.removeEventListener('backgroundChange', handleBackgroundChange);
+    };
+  }, []);
+
   return (
     <div style={{ 
-      padding: '2rem',
-      maxWidth: '1200px',
-      margin: '0 auto'
+      minHeight: '100vh',
+      backgroundImage: background ? `url(/assets/${background})` : 'none',
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat'
     }}>
-      <h1 style={{
-        fontSize: '2.5rem',
-        textAlign: 'center',
-        marginBottom: '1rem'
-      }}>
-        Профиль
-      </h1>
-      <p style={{
-        fontSize: '1.2rem',
-        textAlign: 'center',
-        maxWidth: '800px',
-        margin: '0 auto'
-      }}>
-        Здесь будет профиль.
-      </p>
-      
-      {/* Mobile styles */}
-      <style jsx>{`
-        @media (max-width: 768px) {
-          div {
-            padding: '1.5rem';
-          }
-          
-          h1 {
-            font-size: '2rem';
-          }
-          
-          p {
-            font-size: '1.1rem';
-          }
-        }
-        
-        @media (max-width: 480px) {
-          div {
-            padding: '1rem';
-          }
-          
-          h1 {
-            font-size: '1.7rem';
-          }
-          
-          p {
-            font-size: '1rem';
-          }
-        }
-      `}</style>
+      <ProfileForm user={user} />
     </div>
   );
 };

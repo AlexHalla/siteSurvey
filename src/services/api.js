@@ -1,4 +1,4 @@
-const API_BASE_URL = ''; // Replace with API base URL
+const API_BASE_URL = 'https://setihome.ru/psycho-iam'; // Replace with API base URL
 
 class ApiService {
   constructor() {
