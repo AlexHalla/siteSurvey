@@ -8,6 +8,9 @@ const ProfileForm = ({ user }) => {
   const [isAvatarMenuOpen, setIsAvatarMenuOpen] = useState(false);
   const fileInputRef = useRef(null);
 
+  // Check if device is mobile
+  const isMobile = window.innerWidth <= 768;
+
   // Load saved background from localStorage on component mount
   React.useEffect(() => {
     const savedBackground = localStorage.getItem('profileBackground');
@@ -234,16 +237,32 @@ const ProfileForm = ({ user }) => {
           ))}
         </div>
 
-        <div className={styles.contentPanel}>
-          {sections.map((section) => (
-            <div
-              key={section.id}
-              className={`${styles.panelContent} ${activeSection === section.id ? styles.active : ''}`}
-            >
-              {renderSectionContent(section.id)}
-            </div>
-          ))}
-        </div>
+        {/* For mobile, show content below each button */}
+        {isMobile ? (
+          <div className={styles.contentPanel}>
+            {sections.map((section) => (
+              activeSection === section.id && (
+                <div
+                  key={section.id}
+                  className={`${styles.panelContent} ${activeSection === section.id ? styles.active : ''}`}
+                >
+                  {renderSectionContent(section.id)}
+                </div>
+              )
+            ))}
+          </div>
+        ) : (
+          <div className={styles.contentPanel}>
+            {sections.map((section) => (
+              <div
+                key={section.id}
+                className={`${styles.panelContent} ${activeSection === section.id ? styles.active : ''}`}
+              >
+                {renderSectionContent(section.id)}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

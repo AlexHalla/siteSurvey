@@ -369,15 +369,19 @@
     padding: 1rem;
   }
   
-  .sectionsList {
+  .leftPanel {
     width: 100%;
-    flex-direction: row;
-    flex-wrap: wrap;
   }
   
-  .sectionItem {
-    flex: 1;
-    min-width: 120px;
+  .userInfoContainer {
+    width: 100%;
+    padding: 15px;
+  }
+  
+  .avatarUploadWrapper {
+    width: 120px;
+    height: 120px;
+    margin: 0 auto;
   }
   
   .avatarContainer {
@@ -387,15 +391,47 @@
   
   .username {
     font-size: 1.5rem;
+    padding: 8px 15px;
+  }
+  
+  .rightPanel {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .sectionsList {
+    width: 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+    padding: 0.5rem;
+  }
+  
+  .sectionItem {
+    flex: 1;
+    min-width: 120px;
+    padding: 10px;
+    font-size: 0.9rem;
   }
   
   .contentPanel {
     margin-left: 0;
     margin-top: 1rem;
+    width: 100%;
   }
   
   .panelContent {
+    position: relative;
     padding: 1.5rem;
+    transform: none;
+    width: 100%;
+    height: auto;
+    margin-top: 1rem;
+    display: none;
+  }
+  
+  .panelContent.active {
+    transform: none;
+    display: block;
   }
   
   .panelHeader {
@@ -414,5 +450,86 @@
   
   .formLabel {
     font-size: 15px;
+  }
+  
+  .backgroundSelection {
+    justify-content: center;
+  }
+  
+  .backgroundOption {
+    width: 80px;
+    height: 50px;
+  }
+  
+  .achievementsSection {
+    min-height: 200px;
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .profileContainer {
+    padding: 0.5rem;
+  }
+  
+  .userInfoContainer {
+    padding: 10px;
+  }
+  
+  .avatarUploadWrapper {
+    width: 100px;
+    height: 100px;
+  }
+  
+  .avatarContainer {
+    width: 100px;
+    height: 100px;
+  }
+  
+  .username {
+    font-size: 1.3rem;
+    padding: 6px 12px;
+  }
+  
+  .sectionsList {
+    flex-direction: column;
+  }
+  
+  .sectionItem {
+    min-width: auto;
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+  
+  .panelContent {
+    padding: 1rem;
+  }
+  
+  .panelHeader {
+    font-size: 1.2rem;
+  }
+  
+  .formInput, .formTextarea {
+    padding: 10px;
+    font-size: 14px;
+  }
+  
+  .saveButton {
+    padding: 10px;
+    font-size: 14px;
+  }
+  
+  .formLabel {
+    font-size: 14px;
+  }
+  
+  .backgroundOption {
+    width: 70px;
+    height: 45px;
+  }
+  
+  .achievementsSection {
+    min-height: 150px;
+    padding: 0.8rem;
   }
 }
