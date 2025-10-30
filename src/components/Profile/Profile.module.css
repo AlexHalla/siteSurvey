@@ -363,6 +363,55 @@
   display: none;
 }
 
+.sessionItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+.sessionDeviceInfo {
+  flex: 1;
+}
+
+.sessionDeviceName {
+  margin: 0;
+  font-weight: 500;
+}
+
+.sessionDeviceDetails {
+  margin: 5px 0 0 0;
+  font-size: 0.9rem;
+  color: rgba(255,255,255,0.7);
+}
+
+.sessionActions {
+  display: flex;
+  gap: 10px;
+}
+
+.sessionActionButton {
+  padding: 8px 12px;
+  font-size: 0.9rem;
+}
+
+.sessionNoSessions {
+  text-align: center;
+  padding: 20px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 8px;
+}
+
+.sessionSectionTitle {
+  font-weight: 600;
+  margin: 20px 0 10px 0;
+  padding-bottom: 5px;
+  border-bottom: 1px solid rgba(255,255,255,0.2);
+}
+
 @media (max-width: 768px) {
   .profileContainer {
     flex-direction: column;

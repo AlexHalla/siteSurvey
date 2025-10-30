@@ -91,6 +91,34 @@ export const useAuth = () => {
     setUser(null);
   };
 
+  const listSessions = async () => {
+    try {
+      if (!isAuthenticated || !user) {
+        throw new Error('User not authenticated');
+      }
+      
+      const sessions = await apiService.listSessions(user.id);
+      return sessions;
+    } catch (error) {
+      console.error('Error listing sessions:', error);
+      throw error;
+    }
+  };
+
+  const revokeSession = async (sessionId, reason = null) => {
+    try {
+      if (!isAuthenticated || !user) {
+        throw new Error('User not authenticated');
+      }
+      
+      const result = await apiService.revokeSession(sessionId, reason);
+      return result;
+    } catch (error) {
+      console.error('Error revoking session:', error);
+      throw error;
+    }
+  };
+
   return {
     isAuthenticated,
     user,
@@ -98,6 +126,8 @@ export const useAuth = () => {
     login,
     register,
     logout,
-    checkAuth
+    checkAuth,
+    listSessions,
+    revokeSession
   };
 };

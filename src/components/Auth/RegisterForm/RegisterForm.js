@@ -8,7 +8,8 @@ const RegisterForm = ({ onSwitchToLogin }) => {
     email: '',
     phone: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    consent: false
   });
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
@@ -65,6 +66,10 @@ const RegisterForm = ({ onSwitchToLogin }) => {
 
     if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = 'Пароли не совпадают';
+    }
+
+    if (!formData.consent) {
+      newErrors.consent = 'Необходимо согласиться с пользовательским соглашением';
     }
 
     return newErrors;
@@ -256,6 +261,32 @@ const RegisterForm = ({ onSwitchToLogin }) => {
       </div>
 
       <div className={styles.buttons}>
+        <div className={styles.inputGroup}>
+          <label className={styles.consentLabel}>
+            <input
+              type="checkbox"
+              name="consent"
+              checked={formData.consent}
+              onChange={(e) => {
+                setFormData(prevData => ({
+                  ...prevData,
+                  consent: e.target.checked
+                }));
+                // Очищаем ошибку при изменении поля
+                if (errors.consent) {
+                  setErrors(prevErrors => ({
+                    ...prevErrors,
+                    consent: ''
+                  }));
+                }
+              }}
+              className={styles.consentCheckbox}
+            />
+            Я согласен с <a href="#" className={styles.consentLink}>пользовательским соглашением</a>
+          </label>
+          {errors.consent && <span className={styles.consentError}>{errors.consent}</span>}
+        </div>
+        
         <button 
           type="submit" 
           className={styles.registerButton}

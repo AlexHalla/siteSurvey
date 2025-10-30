@@ -1,7 +1,9 @@
 import React, { useState, useRef } from 'react';
+import { useAuth } from '../../hooks/useAuth';
 import styles from './Profile.module.css';
 
 const ProfileForm = ({ user }) => {
+  const { listSessions, revokeSession } = useAuth();
   const [activeSection, setActiveSection] = useState(null);
   const [avatar, setAvatar] = useState(null);
   const [selectedBackground, setSelectedBackground] = useState(null);
@@ -23,7 +25,8 @@ const ProfileForm = ({ user }) => {
     { id: 'personalization', title: 'Персонализация' },
     { id: 'statistics', title: 'Статистика' },
     { id: 'achievements', title: 'Достижения' },
-    { id: 'history', title: 'История' }
+    { id: 'history', title: 'История' },
+    { id: 'sessions', title: 'Активные сессии' }
   ];
 
   const handleAvatarClick = () => {
@@ -166,6 +169,38 @@ const ProfileForm = ({ user }) => {
           <div>
             <h2 className={styles.panelHeader}>История</h2>
             <p>Здесь будет история активности пользователя.</p>
+          </div>
+        );
+      case 'sessions':
+        return (
+          <div>
+            <h2 className={styles.panelHeader}>Активные сессии</h2>
+            <p>Здесь будет список активных сессий пользователя.</p>
+            <div className={styles.formGroup}>
+              <h3 className={styles.sessionSectionTitle}>Текущая сессия</h3>
+              <div className={styles.sessionItem}>
+                <div className={styles.sessionDeviceInfo}>
+                  <p className={styles.sessionDeviceName}>Это устройство</p>
+                  <p className={styles.sessionDeviceDetails}>
+                    {navigator.userAgent.includes('Mobile') ? 'Мобильное устройство' : 'Компьютер'} • {new Date().toLocaleString()}
+                  </p>
+                </div>
+                <div className={styles.sessionActions}>
+                  <button 
+                    className={`${styles.saveButton} ${styles.sessionActionButton}`}
+                    onClick={() => alert('Вы уверены, что хотите завершить эту сессию?')}
+                  >
+                    Завершить
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div className={styles.formGroup}>
+              <h3 className={styles.sessionSectionTitle}>Другие сессии</h3>
+              <div className={styles.sessionNoSessions}>
+                <p>Нет других активных сессий</p>
+              </div>
+            </div>
           </div>
         );
       default:
