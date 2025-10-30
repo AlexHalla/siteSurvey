@@ -142,19 +142,20 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ user }) => {
               </label>
               <div className={styles.backgroundSelection}>
                 <div 
-                  className={`${styles.backgroundOption} ${selectedBackground === 'background.png' ? styles.selected : ''}`}
+                  className={`${styles.backgroundOption} ${selectedBackground === '/assets/background.png' ? styles.selected : ''}`}
                   style={{ 
                     backgroundImage: 'url(/assets/background.png)'
                   }}
-                  onClick={() => handleBackgroundSelect('background.png')}
+                  onClick={() => handleBackgroundSelect('/assets/background.png')}
                 />
                 <div 
-                  className={`${styles.backgroundOption} ${selectedBackground === 'login_background.png' ? styles.selected : ''}`}
+                  className={`${styles.backgroundOption} ${selectedBackground === '/assets/login_background.png' ? styles.selected : ''}`}
                   style={{ 
                     backgroundImage: 'url(/assets/login_background.png)'
                   }}
-                  onClick={() => handleBackgroundSelect('login_background.png')}
+                  onClick={() => handleBackgroundSelect('/assets/login_background.png')}
                 />
+
               </div>
             </div>
             <button className={styles.saveButton} onClick={handleSave}>

@@ -180,21 +180,41 @@ const HomeForm: React.FC = () => {
                 onClick={() => handleFeedItemClick(item)}
               >
                 <div className={styles.feedImageContainer}>
-                  <img 
-                    src={item.image} 
-                    alt={item.title} 
-                    className={styles.feedImage}
-                    onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-                      const target = e.target as HTMLImageElement;
-                      target.style.backgroundColor = '#7b2cbf';
-                      target.style.display = 'flex';
-                      target.style.alignItems = 'center';
-                      target.style.justifyContent = 'center';
-                      target.style.color = 'white';
-                      target.style.fontWeight = 'bold';
-                      target.textContent = item.type === 'article' ? 'A' : item.type === 'event' ? 'E' : 'I';
-                    }}
-                  />
+                  {item.image && item.image !== '/assets/article1.jpg' && item.image !== '/assets/event1.jpg' && item.image !== '/assets/image1.jpg' && item.image !== '/assets/article2.jpg' ? (
+                    <img 
+                      src={item.image} 
+                      alt={item.title} 
+                      className={styles.feedImage}
+                      onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+                        const target = e.target as HTMLImageElement;
+                        // Set a solid color background as fallback
+                        target.style.backgroundColor = '#7b2cbf';
+                        target.style.display = 'flex';
+                        target.style.alignItems = 'center';
+                        target.style.justifyContent = 'center';
+                        target.style.color = 'white';
+                        target.style.fontWeight = 'bold';
+                        target.style.objectFit = 'cover';
+                        // Add text based on type
+                        target.textContent = item.type === 'article' ? 'A' : item.type === 'event' ? 'E' : 'I';
+                      }}
+                    />
+                  ) : (
+                    <div 
+                      className={styles.feedImage}
+                      style={{
+                        backgroundColor: '#7b2cbf',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: 'white',
+                        fontWeight: 'bold',
+                        objectFit: 'cover'
+                      }}
+                    >
+                      {item.type === 'article' ? 'A' : item.type === 'event' ? 'E' : 'I'}
+                    </div>
+                  )}
                 </div>
                 <div className={styles.feedContent}>
                   <span className={`${styles.feedType} ${styles[item.type]}`}>

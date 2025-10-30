@@ -53,7 +53,8 @@ const ArticleForm: React.FC = () => {
       author: 'Александр Петров',
       category: 'Технологии',
       type: 'article',
-      imageUrl: 'https://via.placeholder.com/800x400/7b2cbf/ffffff?text=Технологии+2025'
+      imageUrl: ''
+
     },
     {
       id: '2',
@@ -64,18 +65,20 @@ const ArticleForm: React.FC = () => {
       author: 'Елена Сидорова',
       category: 'Наука',
       type: 'article',
-      imageUrl: 'https://via.placeholder.com/800x400/7b2cbf/ffffff?text=Квантовая+физика'
+      imageUrl: ''
+
     },
     {
       id: '3',
       title: 'Культурные тенденции современности',
       excerpt: 'Современные культурные тенденции отражают глобализацию и цифровизацию общества. Виртуальные выставки и онлайн-концерты становятся новой нормой...',
-      content: 'Современные культурные тенденции отражают глобализацию и цифровизацию общества. Виртуальные выставки и онлайн-концерты становятся новой нормой.\n\nИскусство все чаще融合 с технологиями, создавая новые формы самовыражения. NFT-арт и цифровые коллекции набирают популярность среди молодежи.\n\nТрадиционные культурные институты адаптируются к новым реалиям, предлагая гибридные форматы взаимодействия с аудиторией. Музеи и театры создают цифровые копии своих экспонатов и спектаклей.\n\nНовая цифровая культура формирует иное восприятие искусства, где зритель становится соавтором произведения, взаимодействуя с ним в виртуальном пространстве.',
+      content: 'Современные культурные тенденции отражают глобализацию и цифровизацию общества. Виртуальные выставки и онлайн-концерты становятся новой нормой.\n\nИскусство все чаще фьюзит с технологиями, создавая новые формы самовыражения. NFT-арт и цифровые коллекции набирают популярность среди молодежи.\n\nТрадиционные культурные институты адаптируются к новым реалиям, предлагая гибридные форматы взаимодействия с аудиторией. Музеи и театры создают цифровые копии своих экспонатов и спектаклей.\n\nНовая цифровая культура формирует иное восприятие искусства, где зритель становится соавтором произведения, взаимодействуя с ним в виртуальном пространстве.',
       date: '18 октября 2025',
       author: 'Мария Иванова',
       category: 'Культура',
       type: 'article',
-      imageUrl: 'https://via.placeholder.com/800x400/7b2cbf/ffffff?text=Культура+2025'
+      imageUrl: ''
+
     },
     // Feed items converted to articles
     {
@@ -133,7 +136,8 @@ const ArticleForm: React.FC = () => {
       author: 'Администрация',
       category: 'Новости',
       type: 'news',
-      imageUrl: 'https://via.placeholder.com/800x400/7b2cbf/ffffff?text=Курс+психологии'
+      imageUrl: ''
+
     },
     {
       id: '9',
@@ -144,7 +148,8 @@ const ArticleForm: React.FC = () => {
       author: 'Оргкомитет',
       category: 'События',
       type: 'news',
-      imageUrl: 'https://via.placeholder.com/800x400/7b2cbf/ffffff?text=Конференция'
+      imageUrl: ''
+
     },
     {
       id: '10',
@@ -155,7 +160,8 @@ const ArticleForm: React.FC = () => {
       author: 'Команда разработки',
       category: 'Новости',
       type: 'news',
-      imageUrl: 'https://via.placeholder.com/800x400/7b2cbf/ffffff?text=Обновление+приложения'
+      imageUrl: ''
+
     }
   ];
 
@@ -261,7 +267,7 @@ const ArticleForm: React.FC = () => {
                 <span>Категория: {selectedArticle.category}</span>
               </div>
             </div>
-            {selectedArticle.imageUrl && (
+            {selectedArticle.imageUrl ? (
               <img
                 src={selectedArticle.imageUrl}
                 alt={selectedArticle.title}
@@ -279,7 +285,24 @@ const ArticleForm: React.FC = () => {
                                      selectedArticle.type === 'image' ? 'I' : 'N';
                 }}
               />
+            ) : (
+              <div 
+                className={styles.detailImage}
+                style={{
+                  backgroundColor: '#7b2cbf',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'white',
+                  fontWeight: 'bold'
+                }}
+              >
+                {selectedArticle.type === 'article' ? 'A' : 
+                 selectedArticle.type === 'event' ? 'E' : 
+                 selectedArticle.type === 'image' ? 'I' : 'N'}
+              </div>
             )}
+
             <div className={styles.detailContent}>
               {selectedArticle.content.split('\n').map((paragraph, index) => (
                 <p key={index}>{paragraph}</p>
@@ -299,7 +322,7 @@ const ArticleForm: React.FC = () => {
                   className={styles.articleCard}
                   onClick={() => handleSelectArticle(article)}
                 >
-                  {article.imageUrl && (
+                  {article.imageUrl !== undefined && article.imageUrl !== '' ? (
                     <img
                       src={article.imageUrl}
                       alt={article.title}
@@ -317,7 +340,24 @@ const ArticleForm: React.FC = () => {
                                            article.type === 'image' ? 'I' : 'N';
                       }}
                     />
+                  ) : (
+                    <div 
+                      className={styles.articleImage}
+                      style={{
+                        backgroundColor: '#7b2cbf',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: 'white',
+                        fontWeight: 'bold'
+                      }}
+                    >
+                      {article.type === 'article' ? 'A' : 
+                       article.type === 'event' ? 'E' : 
+                       article.type === 'image' ? 'I' : 'N'}
+                    </div>
                   )}
+
                   <div className={styles.articleContent}>
                     <div className={`${styles.articleType} ${styles[article.type]}`}>
                       {article.type === 'article' ? 'Статья' : 

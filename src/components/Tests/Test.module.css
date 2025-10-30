@@ -1,0 +1,224 @@
+.container {
+  display: flex;
+  flex-direction: row;
+  height: calc(100vh - 100px);
+  padding: 20px;
+  gap: 20px;
+}
+
+.sidebar {
+  flex: 0 0 300px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebarTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  color: #fff;
+  text-align: center;
+}
+
+.topicList {
+  flex: 1;
+  overflow-y: auto;
+  margin-bottom: 1rem;
+}
+
+.topicItem {
+  padding: 12px 16px;
+  margin-bottom: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #e0e0e0;
+  font-weight: 500;
+}
+
+.topicItem:hover {
+  background: rgba(123, 44, 191, 0.3);
+  transform: translateY(-2px);
+}
+
+.topicItem.active {
+  background: rgba(123, 44, 191, 0.5);
+  color: white;
+  font-weight: 600;
+}
+
+.createTestButton {
+  background: linear-gradient(45deg, #7b2cbf, #5a189a);
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.createTestButton:hover {
+  background: linear-gradient(45deg, #5a189a, #7b2cbf);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(123, 44, 191, 0.4);
+}
+
+.mainContent {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  overflow-y: auto;
+}
+
+.contentTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  color: #fff;
+  text-align: center;
+}
+
+.testList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.testCard {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 15px;
+  padding: 1.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.testCard:hover {
+  background: rgba(123, 44, 191, 0.2);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.testTitle {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #fff;
+}
+
+.testDescription {
+  font-size: 0.9rem;
+  color: #ccc;
+  margin-bottom: 1rem;
+  line-height: 1.4;
+}
+
+.testMeta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: #aaa;
+}
+
+.testDetail {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 15px;
+  padding: 2rem;
+  margin-top: 20px;
+}
+
+.testDetailHeader {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.testDetailTitle {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: #fff;
+}
+
+.testDetailDescription {
+  font-size: 1.1rem;
+  color: #e0e0e0;
+  line-height: 1.6;
+  margin-bottom: 2rem;
+}
+
+.testActions {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+}
+
+.startTestButton {
+  background: linear-gradient(45deg, #7b2cbf, #5a189a);
+  color: white;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.startTestButton:hover {
+  background: linear-gradient(45deg, #5a189a, #7b2cbf);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(123, 44, 191, 0.4);
+}
+
+.backButton {
+  background: rgba(255, 255, 255, 0.1);
+  color: #e0e0e0;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 12px 30px;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.backButton:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+  .container {
+    flex-direction: column;
+    height: auto;
+  }
+  
+  .sidebar {
+    flex: 0 0 auto;
+  }
+  
+  .testList {
+    grid-template-columns: 1fr;
+  }
+}

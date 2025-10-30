@@ -34,7 +34,7 @@ const Profile: React.FC = () => {
   return (
     <div style={{ 
       minHeight: '100vh',
-      backgroundImage: background ? `url(/assets/${background})` : 'none',
+      backgroundImage: background ? `url(${background})` : 'none',
       backgroundSize: 'cover',
       backgroundPosition: 'center',
       backgroundRepeat: 'no-repeat'
