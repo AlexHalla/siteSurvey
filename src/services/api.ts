@@ -1,6 +1,10 @@
-const API_BASE_URL = ''; // Replace with API base URL
+const API_BASE_URL = 'https:'; // Replace with API base URL
 
 class ApiService {
+  baseURL: string;
+  accessToken: string | null;
+  refreshToken: string | null;
+
   constructor() {
     this.baseURL = API_BASE_URL;
     this.accessToken = localStorage.getItem('access_token');
@@ -8,7 +12,7 @@ class ApiService {
   }
 
   // Set tokens
-  setTokens(accessToken, refreshToken) {
+  setTokens(accessToken: string, refreshToken: string): void {
     this.accessToken = accessToken;
     this.refreshToken = refreshToken;
     localStorage.setItem('access_token', accessToken);
@@ -16,7 +20,7 @@ class ApiService {
   }
 
   // Clear tokens
-  clearTokens() {
+  clearTokens(): void {
     this.accessToken = null;
     this.refreshToken = null;
     localStorage.removeItem('access_token');
@@ -25,8 +29,8 @@ class ApiService {
   }
 
   // Get headers for requests
-  getHeaders(includeAuth = false) {
-    const headers = {
+  getHeaders(includeAuth: boolean = false): { [key: string]: string } {
+    const headers: { [key: string]: string } = {
       'Content-Type': 'application/json',
     };
 
@@ -38,7 +42,7 @@ class ApiService {
   }
 
   // Refresh token
-  async refreshToken() {
+  async refreshAuthToken(): Promise<any> {
     if (!this.refreshToken) {
       throw new Error('No refresh token available');
     }
@@ -66,9 +70,9 @@ class ApiService {
   }
 
   // Make API request with automatic token refresh
-  async request(endpoint, options = {}) {
+  async request(endpoint: string, options: RequestInit = {}): Promise<Response> {
     const url = `${this.baseURL}${endpoint}`;
-    const includeAuth = options.headers && options.headers['Authorization'];
+    const includeAuth = !!(options.headers && 'Authorization' in options.headers);
 
     let response = await fetch(url, {
       ...options,
@@ -81,7 +85,7 @@ class ApiService {
     // If unauthorized, try to refresh token and retry
     if (response.status === 401 && includeAuth && this.refreshToken) {
       try {
-        await this.refreshToken();
+        await this.refreshAuthToken();
         // Retry the request with new token
         response = await fetch(url, {
           ...options,
@@ -101,7 +105,7 @@ class ApiService {
   }
 
   // Auth endpoints
-  async login(identifier, password) {
+  async login(identifier: string, password: string): Promise<any> {
     const response = await this.request('/api/v1/auth/login', {
       method: 'POST',
       body: JSON.stringify({ identifier, password })
@@ -114,7 +118,7 @@ class ApiService {
     return await response.json();
   }
 
-  async register(username, password, email = null, phone = null) {
+  async register(username: string, password: string, email: string | null | undefined = null, phone: string | null | undefined = null): Promise<any> {
     const response = await this.request('/api/v1/user/register', {
       method: 'POST',
       body: JSON.stringify({ username, password, email, phone })
@@ -128,11 +132,11 @@ class ApiService {
   }
 
   // User endpoints
-  async changePassword(currentPassword, newPassword, userId = null) {
+  async changePassword(currentPassword: string, newPassword: string, userId: number | null = null): Promise<any> {
     const response = await this.request('/api/v1/user/password/change', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${this.accessToken}`
+        'Authorization': `Bearer ${this.accessToken!}`
       },
       body: JSON.stringify({ current_password: currentPassword, new_password: newPassword, user_id: userId })
     });
@@ -145,7 +149,7 @@ class ApiService {
   }
 
   // Session endpoints
-  async validateSession(sessionId) {
+  async validateSession(sessionId: string): Promise<any> {
     const response = await this.request(`/api/v1/session/validate?session_id=${sessionId}`, {
       method: 'GET'
     });
@@ -157,7 +161,7 @@ class ApiService {
     return await response.json();
   }
 
-  async listSessions(userId) {
+  async listSessions(userId: number): Promise<any> {
     const response = await this.request(`/api/v1/session/list?user_id=${userId}`, {
       method: 'GET'
     });
@@ -169,11 +173,11 @@ class ApiService {
     return await response.json();
   }
 
-  async revokeSession(sessionId, reason = null) {
+  async revokeSession(sessionId: string, reason: string | null | undefined = null): Promise<any> {
     const response = await this.request('/api/v1/session/revoke', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${this.accessToken}`
+        'Authorization': `Bearer ${this.accessToken!}`
       },
       body: JSON.stringify({ session_id: sessionId, reason })
     });

@@ -1,16 +1,29 @@
 import { useState, useEffect } from 'react';
 import apiService from '../services/api';
+import { User, AuthResponse, Session } from '../types';
 
-export const useAuth = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+interface UseAuthReturn {
+  isAuthenticated: boolean;
+  user: User | null;
+  isLoading: boolean;
+  login: (identifier: string, password: string) => Promise<{ success: boolean; data?: AuthResponse; error?: string }>;
+  register: (username: string, password: string, email?: string | null, phone?: string | null) => Promise<{ success: boolean; data?: any; error?: string; requiresVerification?: boolean }>;
+  logout: () => void;
+  checkAuth: () => void;
+  listSessions: () => Promise<Session[]>;
+  revokeSession: (sessionId: string, reason?: string | null) => Promise<any>;
+}
+
+export const useAuth = (): UseAuthReturn => {
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     checkAuth();
   }, []);
 
-  const checkAuth = () => {
+  const checkAuth = (): void => {
     const accessToken = localStorage.getItem('access_token');
     // Check if we have a token and validate it with the backend
     if (accessToken) {
@@ -34,10 +47,10 @@ export const useAuth = () => {
     setIsLoading(false);
   };
 
-  const login = async (identifier, password) => {
+  const login = async (identifier: string, password: string) => {
     try {
       setIsLoading(true);
-      const response = await apiService.login(identifier, password);
+      const response: AuthResponse = await apiService.login(identifier, password);
       
       // Save tokens
       apiService.setTokens(response.access_token, response.refresh_token);
@@ -50,7 +63,7 @@ export const useAuth = () => {
       setUser(response.user);
       
       return { success: true, data: response };
-    } catch (error) {
+    } catch (error: any) {
       console.error('Login error:', error);
       return { success: false, error: error.message };
     } finally {
@@ -58,10 +71,13 @@ export const useAuth = () => {
     }
   };
 
-  const register = async (username, password, email = null, phone = null) => {
+  const register = async (username: string, password: string, email: string | null = null, phone: string | null = null) => {
     try {
       setIsLoading(true);
-      const response = await apiService.register(username, password, email, phone);
+      // Convert empty strings to null to match apiService expectations
+      const emailParam = email === '' ? null : email;
+      const phoneParam = phone === '' ? null : phone;
+      const response: any = await apiService.register(username, password, emailParam, phoneParam);
       
       // If registration requires verification, handle accordingly
       if (response.requires_verification) {
@@ -77,7 +93,7 @@ export const useAuth = () => {
       }
       
       return { success: true, data: response, requiresVerification: false };
-    } catch (error) {
+    } catch (error: any) {
       console.error('Registration error:', error);
       return { success: false, error: error.message };
     } finally {
@@ -85,35 +101,37 @@ export const useAuth = () => {
     }
   };
 
-  const logout = () => {
+  const logout = (): void => {
     apiService.clearTokens();
     setIsAuthenticated(false);
     setUser(null);
   };
 
-  const listSessions = async () => {
+  const listSessions = async (): Promise<Session[]> => {
     try {
       if (!isAuthenticated || !user) {
         throw new Error('User not authenticated');
       }
       
-      const sessions = await apiService.listSessions(user.id);
+      const sessions: Session[] = await apiService.listSessions(user.id);
       return sessions;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error listing sessions:', error);
       throw error;
     }
   };
 
-  const revokeSession = async (sessionId, reason = null) => {
+  const revokeSession = async (sessionId: string, reason?: string | null): Promise<any> => {
     try {
       if (!isAuthenticated || !user) {
         throw new Error('User not authenticated');
       }
       
-      const result = await apiService.revokeSession(sessionId, reason);
+      // Convert empty strings to null to match apiService expectations
+      const reasonParam = reason === '' ? null : reason;
+      const result = await apiService.revokeSession(sessionId, reasonParam);
       return result;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error revoking session:', error);
       throw error;
     }

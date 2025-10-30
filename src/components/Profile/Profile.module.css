@@ -121,6 +121,25 @@
   box-sizing: border-box;
 }
 
+/* Achievements styles similar to home page */
+.achievements {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin: 1rem 0;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.achievementBadge {
+  background: rgba(123, 44, 191, 0.3);
+  padding: 0.3rem 0.6rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #d1b3ff;
+}
+
 .userInfoContainer {
   background: rgba(45, 20, 90, 0.45);
   backdrop-filter: blur(18px) saturate(180%);
@@ -148,6 +167,23 @@
   padding: 1.5rem;
   margin-top: 1rem;
   color: #fff;
+}
+
+.achievementsTitle {
+  font-size: 1.3rem;
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: #fff;
+  text-align: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  padding-bottom: 0.5rem;
+}
+
+.achievementsDescription {
+  color: #e8ddff;
+  text-align: center;
+  font-size: 1rem;
+  line-height: 1.5;
 }
 
 .rightPanel {
@@ -443,6 +479,10 @@
     padding: 8px 15px;
   }
   
+  .achievements {
+    margin: 0.5rem 0;
+  }
+  
   .rightPanel {
     flex-direction: column;
     width: 100%;
@@ -540,6 +580,15 @@
     padding: 6px 12px;
   }
   
+  .achievements {
+    gap: 0.3rem;
+  }
+  
+  .achievementBadge {
+    padding: 0.2rem 0.5rem;
+    font-size: 0.8rem;
+  }
+  
   .sectionsList {
     flex-direction: column;
   }
@@ -580,5 +629,13 @@
   .achievementsSection {
     min-height: 150px;
     padding: 0.8rem;
+  }
+  
+  .achievementsTitle {
+    font-size: 1.1rem;
+  }
+  
+  .achievementsDescription {
+    font-size: 0.9rem;
   }
 }

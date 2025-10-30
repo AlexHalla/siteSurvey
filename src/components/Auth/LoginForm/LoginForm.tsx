@@ -2,25 +2,41 @@ import React, { useState } from 'react';
 import { useAuth } from '../../../hooks/useAuth';
 import styles from './LoginForm.module.css';
 
-const LoginForm = ({ onSwitchToRegister }) => {
-  const [formData, setFormData] = useState({
+interface LoginFormProps {
+  onSwitchToRegister: () => void;
+}
+
+interface FormData {
+  identifier: string;
+  password: string;
+}
+
+interface FormErrors {
+  identifier?: string;
+  password?: string;
+  submit?: string;
+}
+
+const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister }) => {
+  const [formData, setFormData] = useState<FormData>({
     identifier: '',
     password: ''
   });
-  const [errors, setErrors] = useState({});
+  const [errors, setErrors] = useState<FormErrors>({});
   const [isLoading, setIsLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const { login } = useAuth();
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [name]: value
     });
-    if (errors[e.target.name]) {
+    if (errors[name as keyof FormErrors]) {
       setErrors({
         ...errors,
-        [e.target.name]: ''
+        [name]: ''
       });
     }
     if (successMessage) {
@@ -28,8 +44,8 @@ const LoginForm = ({ onSwitchToRegister }) => {
     }
   };
 
-  const validateForm = () => {
-    const newErrors = {};
+  const validateForm = (): FormErrors => {
+    const newErrors: FormErrors = {};
 
     if (!formData.identifier.trim()) {
       newErrors.identifier = 'Email или телефон';
@@ -42,7 +58,7 @@ const LoginForm = ({ onSwitchToRegister }) => {
     return newErrors;
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     const formErrors = validateForm();

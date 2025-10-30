@@ -1,6 +1,6 @@
 import React from 'react';
 
-const Articles = () => {
+const Tests: React.FC = () => {
   return (
     <div style={{ 
       padding: '2rem',
@@ -12,7 +12,7 @@ const Articles = () => {
         textAlign: 'center',
         marginBottom: '1rem'
       }}>
-        Статьи
+        Тесты
       </h1>
       <p style={{
         fontSize: '1.2rem',
@@ -20,36 +20,36 @@ const Articles = () => {
         maxWidth: '800px',
         margin: '0 auto'
       }}>
-        Здесь будут отображаться статьи.
+        Здесь будут доступны тесты.
       </p>
       
       {/* Mobile styles */}
-      <style jsx>{`
+      <style>{`
         @media (max-width: 768px) {
           div {
-            padding: '1.5rem';
+            padding: 1.5rem;
           }
           
           h1 {
-            font-size: '2rem';
+            font-size: 2rem;
           }
           
           p {
-            font-size: '1.1rem';
+            font-size: 1.1rem;
           }
         }
         
         @media (max-width: 480px) {
           div {
-            padding: '1rem';
+            padding: 1rem;
           }
           
           h1 {
-            font-size: '1.7rem';
+            font-size: 1.7rem;
           }
           
           p {
-            font-size: '1rem';
+            font-size: 1rem;
           }
         }
       `}</style>
@@ -57,4 +57,4 @@ const Articles = () => {
   );
 };
 
-export default Articles;
+export default Tests;

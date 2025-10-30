@@ -1,27 +1,37 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import styles from './Profile.module.css';
+import { User } from '../../types';
 
-const ProfileForm = ({ user }) => {
+interface ProfileFormProps {
+  user: User;
+}
+
+interface Section {
+  id: string;
+  title: string;
+}
+
+const ProfileForm: React.FC<ProfileFormProps> = ({ user }) => {
   const { listSessions, revokeSession } = useAuth();
-  const [activeSection, setActiveSection] = useState(null);
-  const [avatar, setAvatar] = useState(null);
-  const [selectedBackground, setSelectedBackground] = useState(null);
+  const [activeSection, setActiveSection] = useState<string | null>(null);
+  const [avatar, setAvatar] = useState<string | null>(null);
+  const [selectedBackground, setSelectedBackground] = useState<string | null>(null);
   const [isAvatarMenuOpen, setIsAvatarMenuOpen] = useState(false);
-  const fileInputRef = useRef(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Check if device is mobile
   const isMobile = window.innerWidth <= 768;
 
   // Load saved background from localStorage on component mount
-  React.useEffect(() => {
+  useEffect(() => {
     const savedBackground = localStorage.getItem('profileBackground');
     if (savedBackground) {
       setSelectedBackground(savedBackground);
     }
   }, []);
 
-  const sections = [
+  const sections: Section[] = [
     { id: 'personalization', title: 'Персонализация' },
     { id: 'statistics', title: 'Статистика' },
     { id: 'achievements', title: 'Достижения' },
@@ -35,18 +45,20 @@ const ProfileForm = ({ user }) => {
     }
   };
 
-  const handleFileChange = (event) => {
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
       const file = event.target.files[0];
       const reader = new FileReader();
       reader.onload = (e) => {
-        setAvatar(e.target.result);
+        if (e.target && typeof e.target.result === 'string') {
+          setAvatar(e.target.result);
+        }
       };
       reader.readAsDataURL(file);
     }
   };
 
-  const handleAvatarIconClick = (e) => {
+  const handleAvatarIconClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     setIsAvatarMenuOpen(!isAvatarMenuOpen);
   };
@@ -62,7 +74,7 @@ const ProfileForm = ({ user }) => {
     console.log('Generate avatar functionality will be implemented later');
   };
 
-  const handleBackgroundSelect = (background) => {
+  const handleBackgroundSelect = (background: string) => {
     setSelectedBackground(background);
     // Change background immediately without requiring save
     window.dispatchEvent(new CustomEvent('backgroundChange', { detail: background }));
@@ -76,7 +88,7 @@ const ProfileForm = ({ user }) => {
   };
 
   // Close avatar menu when clicking outside
-  React.useEffect(() => {
+  useEffect(() => {
     const handleClickOutside = () => {
       if (isAvatarMenuOpen) {
         setIsAvatarMenuOpen(false);
@@ -89,7 +101,7 @@ const ProfileForm = ({ user }) => {
     };
   }, [isAvatarMenuOpen]);
 
-  const renderSectionContent = (sectionId) => {
+  const renderSectionContent = (sectionId: string) => {
     switch (sectionId) {
       case 'personalization':
         return (
@@ -120,7 +132,7 @@ const ProfileForm = ({ user }) => {
               </label>
               <textarea 
                 placeholder="Расскажите немного о себе"
-                rows="4"
+                rows={4}
                 className={styles.formTextarea}
               />
             </div>
@@ -252,9 +264,19 @@ const ProfileForm = ({ user }) => {
           <div className={styles.username}>
             {user?.username || 'Пользователь'}
           </div>
+          {/* Achievements section similar to home page */}
+          <div className={styles.achievements}>
+            <span className={styles.achievementBadge}>🏆 5</span>
+            <span className={styles.achievementBadge}>⭐ 12</span>
+            <span className={styles.achievementBadge}>🏅 3</span>
+          </div>
         </div>
         <div className={styles.achievementsSection}>
-          {/* Achievements will be displayed here in the future */}
+          {/* This section can be used for additional achievements or information */}
+          <h3 className={styles.achievementsTitle}>Ваши достижения</h3>
+          <p className={styles.achievementsDescription}>
+            Продолжайте активно использовать сайт, чтобы получить больше достижений!
+          </p>
         </div>
       </div>
 

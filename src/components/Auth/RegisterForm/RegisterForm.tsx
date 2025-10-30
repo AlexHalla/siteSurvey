@@ -2,8 +2,32 @@ import React, { useState } from 'react';
 import styles from './RegisterForm.module.css';
 import { useAuth } from '../../../hooks/useAuth';
 
-const RegisterForm = ({ onSwitchToLogin }) => {
-  const [formData, setFormData] = useState({
+interface RegisterFormProps {
+  onSwitchToLogin: () => void;
+}
+
+interface FormData {
+  username: string;
+  email: string;
+  phone: string;
+  password: string;
+  confirmPassword: string;
+  consent: boolean;
+}
+
+interface FormErrors {
+  username?: string;
+  email?: string;
+  phone?: string;
+  password?: string;
+  confirmPassword?: string;
+  consent?: string;
+  contact?: string;
+  submit?: string;
+}
+
+const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) => {
+  const [formData, setFormData] = useState<FormData>({
     username: '',
     email: '',
     phone: '',
@@ -11,21 +35,21 @@ const RegisterForm = ({ onSwitchToLogin }) => {
     confirmPassword: '',
     consent: false
   });
-  const [errors, setErrors] = useState({});
+  const [errors, setErrors] = useState<FormErrors>({});
   const [isLoading, setIsLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
 
   const { register } = useAuth();
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value, type, checked } = e.target;
     setFormData(prevData => ({
       ...prevData,
-      [name]: value
+      [name]: type === 'checkbox' ? checked : value
     }));
     
     // Очищаем ошибку при изменении поля
-    if (errors[name]) {
+    if (errors[name as keyof FormErrors]) {
       setErrors(prevErrors => ({
         ...prevErrors,
         [name]: ''
@@ -38,8 +62,8 @@ const RegisterForm = ({ onSwitchToLogin }) => {
     }
   };
 
-  const validateForm = () => {
-    const newErrors = {};
+  const validateForm = (): FormErrors => {
+    const newErrors: FormErrors = {};
 
     if (!formData.username.trim()) {
       newErrors.username = 'Имя пользователя обязательно';
@@ -75,7 +99,7 @@ const RegisterForm = ({ onSwitchToLogin }) => {
     return newErrors;
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     const formErrors = validateForm();
@@ -118,8 +142,9 @@ const RegisterForm = ({ onSwitchToLogin }) => {
             email: '',
             phone: '',
             password: '',
-            confirmPassword: ''
-          });
+            confirmPassword: '',
+            consent: false
+          } as FormData);
           
           // РЕДИРЕКТ
           setTimeout(() => {
@@ -267,19 +292,7 @@ const RegisterForm = ({ onSwitchToLogin }) => {
               type="checkbox"
               name="consent"
               checked={formData.consent}
-              onChange={(e) => {
-                setFormData(prevData => ({
-                  ...prevData,
-                  consent: e.target.checked
-                }));
-                // Очищаем ошибку при изменении поля
-                if (errors.consent) {
-                  setErrors(prevErrors => ({
-                    ...prevErrors,
-                    consent: ''
-                  }));
-                }
-              }}
+              onChange={handleChange}
               className={styles.consentCheckbox}
             />
             Я согласен с <a href="#" className={styles.consentLink}>пользовательским соглашением</a>

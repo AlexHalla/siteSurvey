@@ -1,10 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import ProfileForm from '../components/Profile/ProfileForm';
+import { User } from '../types';
 
-const Profile = () => {
+interface BackgroundChangeEvent extends CustomEvent {
+  detail: string;
+}
+
+const Profile: React.FC = () => {
   const { user } = useAuth();
-  const [background, setBackground] = useState(null);
+  const [background, setBackground] = useState<string | null>(null);
 
   useEffect(() => {
     // Load saved background from localStorage
@@ -14,15 +19,15 @@ const Profile = () => {
     }
 
     // Listen for background change events
-    const handleBackgroundChange = (event) => {
+    const handleBackgroundChange = (event: BackgroundChangeEvent) => {
       setBackground(event.detail);
     };
 
-    window.addEventListener('backgroundChange', handleBackgroundChange);
+    window.addEventListener('backgroundChange', handleBackgroundChange as EventListener);
 
     // Cleanup event listener
     return () => {
-      window.removeEventListener('backgroundChange', handleBackgroundChange);
+      window.removeEventListener('backgroundChange', handleBackgroundChange as EventListener);
     };
   }, []);
 
@@ -34,7 +39,7 @@ const Profile = () => {
       backgroundPosition: 'center',
       backgroundRepeat: 'no-repeat'
     }}>
-      <ProfileForm user={user} />
+      <ProfileForm user={user as User} />
     </div>
   );
 };

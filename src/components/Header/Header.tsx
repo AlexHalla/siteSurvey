@@ -2,8 +2,13 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import styles from './Header.module.css';
+import { User } from '../../types';
 
-const Header = () => {
+interface HeaderProps {
+  // Add any props if needed in the future
+}
+
+const Header: React.FC<HeaderProps> = () => {
   const { isAuthenticated, user, logout } = useAuth();
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
