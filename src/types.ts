@@ -59,3 +59,56 @@ export interface FeedItem {
   time?: string;
   image: string;
 }
+
+// Test types
+export interface TestScale {
+  id: string;
+  name: string;
+  min: number;
+  max: number;
+  interpretations: {
+    minScore: number;
+    maxScore: number;
+    description: string;
+  }[];
+}
+
+export interface TestQuestionOption {
+  id: string;
+  text: string;
+  isCorrect?: boolean;
+  score?: { [scaleId: string]: number }; // Score contribution to each scale
+}
+
+export interface TestQuestion {
+  id: string;
+  text: string;
+  type: 'single' | 'multiple' | 'text';
+  options?: TestQuestionOption[];
+  correctAnswer?: string;
+  scaleId?: string; // Which scale this question contributes to
+}
+
+export interface Test {
+  id: string;
+  title: string;
+  description: string;
+  duration?: string;
+  questions: number;
+  difficulty?: 'easy' | 'medium' | 'hard';
+  questionsList?: TestQuestion[];
+  scales?: TestScale[]; // Scoring scales for this test
+}
+
+export interface TestResult {
+  id: string;
+  testId: string;
+  userId: number;
+  score: number;
+  completedAt: string;
+  answers: {
+    questionId: string;
+    answer: string | string[];
+  }[];
+  scaleScores?: { [scaleId: string]: number }; // Scores for each scale
+}

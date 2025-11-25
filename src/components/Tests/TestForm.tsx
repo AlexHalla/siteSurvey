@@ -1,5 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styles from './Test.module.css';
+import { Test } from '../../types';
+import apiService from '../../services/api';
 
 // Define types
 interface TestTopic {
@@ -8,121 +11,140 @@ interface TestTopic {
   count: number;
 }
 
-interface Test {
-  id: string;
-  title: string;
-  description: string;
-  duration: string;
-  questions: number;
-  difficulty: 'easy' | 'medium' | 'hard';
-}
-
 const TestForm: React.FC = () => {
+  const navigate = useNavigate();
+  
   // Topics data
   const topics: TestTopic[] = [
-    { id: 'all', name: 'Все тесты', count: 24 },
-    { id: 'new', name: 'Новые', count: 5 },
-    { id: 'popular', name: 'Популярные', count: 8 },
-    { id: 'psychology', name: 'Психология', count: 7 },
-    { id: 'personality', name: 'Тип личности', count: 4 },
-    { id: 'intelligence', name: 'Интеллект', count: 3 },
-    { id: 'career', name: 'Профориентация', count: 3 },
-  ];
-
-  // Mock data for tests
-  const allTests: Test[] = [
-    {
-      id: '1',
-      title: 'Тест на уровень тревожности',
-      description: 'Определите свой уровень тревожности и узнайте способы управления стрессом',
-      duration: '10 мин',
-      questions: 25,
-      difficulty: 'medium'
-    },
-    {
-      id: '2',
-      title: 'Определение типа личности',
-      description: 'Узнайте к какому психологическому типу вы относитесь по методике Карла Юнга',
-      duration: '15 мин',
-      questions: 40,
-      difficulty: 'medium'
-    },
-    {
-      id: '3',
-      title: 'Эмоциональный интеллект',
-      description: 'Проверьте уровень развития вашего эмоционального интеллекта',
-      duration: '12 мин',
-      questions: 30,
-      difficulty: 'hard'
-    },
-    {
-      id: '4',
-      title: 'Психологическая устойчивость',
-      description: 'Оцените вашу способность справляться с жизненными трудностями',
-      duration: '8 мин',
-      questions: 20,
-      difficulty: 'easy'
-    },
-    {
-      id: '5',
-      title: 'Креативное мышление',
-      description: 'Проверьте уровень вашего творческого потенциала',
-      duration: '20 мин',
-      questions: 35,
-      difficulty: 'hard'
-    },
-    {
-      id: '6',
-      title: 'Социальный интеллект',
-      description: 'Оцените свои навыки общения и понимания других людей',
-      duration: '10 мин',
-      questions: 25,
-      difficulty: 'medium'
-    }
+    { id: 'all', name: 'Все тесты', count: 0 },
+    { id: 'new', name: 'Новые', count: 0 },
+    { id: 'popular', name: 'Популярные', count: 0 },
+    { id: 'psychology', name: 'Психология', count: 0 },
+    { id: 'personality', name: 'Тип личности', count: 0 },
+    { id: 'intelligence', name: 'Интеллект', count: 0 },
+    { id: 'career', name: 'Профориентация', count: 0 },
   ];
 
   // State management
   const [activeTopic, setActiveTopic] = useState<string>('all');
-  const [selectedTest, setSelectedTest] = useState<Test | null>(null);
-  const [filteredTests, setFilteredTests] = useState<Test[]>(allTests);
+  const [tests, setTests] = useState<Test[]>([]);
+  const [filteredTests, setFilteredTests] = useState<Test[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Load tests from API
+  useEffect(() => {
+    const loadTests = async () => {
+      try {
+        setLoading(true);
+        // In a real implementation, you would fetch from API:
+        // const response = await apiService.getTests();
+        // const testData = await response.data;
+        
+        // For now, using empty array since we want to show only created tests
+        setTests([]);
+        setFilteredTests([]);
+      } catch (err) {
+        setError('Не удалось загрузить тесты');
+        console.error('Error loading tests:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadTests();
+  }, []);
 
   // Filter tests based on selected topic
-  React.useEffect(() => {
+  useEffect(() => {
     if (activeTopic === 'all') {
-      setFilteredTests(allTests);
+      setFilteredTests(tests);
     } else if (activeTopic === 'new') {
       // For demo purposes, show first 3 tests as "new"
-      setFilteredTests(allTests.slice(0, 3));
+      setFilteredTests(tests.slice(0, 3));
     } else if (activeTopic === 'popular') {
       // For demo purposes, show last 3 tests as "popular"
-      setFilteredTests(allTests.slice(-3));
+      setFilteredTests(tests.slice(-3));
     } else {
       // For other topics, show all tests (in a real app, you would filter by topic)
-      setFilteredTests(allTests);
+      setFilteredTests(tests);
     }
-  }, [activeTopic]);
+  }, [activeTopic, tests]);
 
   // Handle topic selection
   const handleSelectTopic = (topicId: string) => {
     setActiveTopic(topicId);
-    // Reset test selection when changing topics
-    setSelectedTest(null);
   };
 
   // Handle test selection
   const handleSelectTest = (test: Test) => {
-    setSelectedTest(test);
-  };
-
-  // Handle back to tests list
-  const handleBackToList = () => {
-    setSelectedTest(null);
+    // Navigate to test taking page
+    navigate(`/tests/take/${test.id}`);
   };
 
   // Handle create test
   const handleCreateTest = () => {
-    alert('Функция создания теста будет реализована позже');
+    // Navigate to test constructor
+    navigate('/tests/constructor');
   };
+
+  if (loading) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.sidebar}>
+          <h2 className={styles.sidebarTitle}>Категории тестов</h2>
+          <div className={styles.topicList}>
+            {topics.map((topic) => (
+              <div
+                key={topic.id}
+                className={`${styles.topicItem} ${activeTopic === topic.id ? styles.active : ''}`}
+                onClick={() => handleSelectTopic(topic.id)}
+              >
+                {topic.name} ({topic.count})
+              </div>
+            ))}
+          </div>
+          <button className={styles.createTestButton} onClick={handleCreateTest}>
+            + Создать тест
+          </button>
+        </div>
+        <div className={styles.mainContent}>
+          <div className={styles.testsList}>
+            <h2 className={styles.contentTitle}>Загрузка тестов...</h2>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.sidebar}>
+          <h2 className={styles.sidebarTitle}>Категории тестов</h2>
+          <div className={styles.topicList}>
+            {topics.map((topic) => (
+              <div
+                key={topic.id}
+                className={`${styles.topicItem} ${activeTopic === topic.id ? styles.active : ''}`}
+                onClick={() => handleSelectTopic(topic.id)}
+              >
+                {topic.name} ({topic.count})
+              </div>
+            ))}
+          </div>
+          <button className={styles.createTestButton} onClick={handleCreateTest}>
+            + Создать тест
+          </button>
+        </div>
+        <div className={styles.mainContent}>
+          <div className={styles.testsList}>
+            <h2 className={styles.contentTitle}>Ошибка: {error}</h2>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.container}>
@@ -147,34 +169,18 @@ const TestForm: React.FC = () => {
 
       {/* Main content area */}
       <div className={styles.mainContent}>
-        {selectedTest ? (
-          // Test detail view
-          <div className={styles.testDetail}>
-            <div className={styles.testDetailHeader}>
-              <h1 className={styles.testDetailTitle}>{selectedTest.title}</h1>
-              <div className={styles.testMeta}>
-                <span>Время: {selectedTest.duration}</span>
-                <span>Вопросов: {selectedTest.questions}</span>
-                <span>
-                  Сложность: {
-                    selectedTest.difficulty === 'easy' ? 'Легкий' :
-                    selectedTest.difficulty === 'medium' ? 'Средний' : 'Сложный'
-                  }
-                </span>
-              </div>
+        <div className={styles.testsList}>
+          <h2 className={styles.contentTitle}>
+            {topics.find(topic => topic.id === activeTopic)?.name || 'Все тесты'}
+          </h2>
+          {filteredTests.length === 0 ? (
+            <div className={styles.emptyState}>
+              <p>Пока нет тестов в этой категории.</p>
+              <button className={styles.createTestButton} onClick={handleCreateTest}>
+                Создать первый тест
+              </button>
             </div>
-            <p className={styles.testDetailDescription}>{selectedTest.description}</p>
-            <div className={styles.testActions}>
-              <button className={styles.startTestButton}>Начать тест</button>
-              <button className={styles.backButton} onClick={handleBackToList}>Назад</button>
-            </div>
-          </div>
-        ) : (
-          // Tests list view
-          <div className={styles.testsList}>
-            <h2 className={styles.contentTitle}>
-              {topics.find(topic => topic.id === activeTopic)?.name || 'Все тесты'}
-            </h2>
+          ) : (
             <div className={styles.testList}>
               {filteredTests.map((test) => (
                 <div
@@ -184,15 +190,19 @@ const TestForm: React.FC = () => {
                 >
                   <h3 className={styles.testTitle}>{test.title}</h3>
                   <p className={styles.testDescription}>{test.description}</p>
+                  {test.scales && test.scales.length > 0 && (
+                    <div className={styles.testScales}>
+                      Шкалы: {test.scales.map(scale => scale.name).join(', ')}
+                    </div>
+                  )}
                   <div className={styles.testMeta}>
-                    <span>⏱️ {test.duration}</span>
                     <span>❓ {test.questions} вопросов</span>
                   </div>
                 </div>
               ))}
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );

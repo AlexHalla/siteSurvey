@@ -188,6 +188,100 @@ class ApiService {
 
     return await response.json();
   }
+
+  // Test endpoints
+  async getTests(): Promise<any> {
+    const response = await this.request('/api/v1/tests', {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${this.accessToken!}`
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch tests with status ${response.status}`);
+    }
+
+    return await response.json();
+  }
+
+  async getTest(id: string): Promise<any> {
+    const response = await this.request(`/api/v1/tests/${id}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${this.accessToken!}`
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch test with status ${response.status}`);
+    }
+
+    return await response.json();
+  }
+
+  async createTest(testData: any): Promise<any> {
+    const response = await this.request('/api/v1/tests', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${this.accessToken!}`
+      },
+      body: JSON.stringify(testData)
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to create test with status ${response.status}`);
+    }
+
+    return await response.json();
+  }
+
+  async updateTest(id: string, testData: any): Promise<any> {
+    const response = await this.request(`/api/v1/tests/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${this.accessToken!}`
+      },
+      body: JSON.stringify(testData)
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to update test with status ${response.status}`);
+    }
+
+    return await response.json();
+  }
+
+  async deleteTest(id: string): Promise<any> {
+    const response = await this.request(`/api/v1/tests/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${this.accessToken!}`
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to delete test with status ${response.status}`);
+    }
+
+    return await response.json();
+  }
+
+  async submitTestResult(resultData: any): Promise<any> {
+    const response = await this.request('/api/v1/test-results', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${this.accessToken!}`
+      },
+      body: JSON.stringify(resultData)
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to submit test result with status ${response.status}`);
+    }
+
+    return await response.json();
+  }
 }
 
 // Create and export singleton instance

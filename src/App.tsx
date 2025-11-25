@@ -25,13 +25,21 @@ function AppWrapper() {
       backgroundClass = 'articlesBackground';
       break;
     case '/tests':
+    case '/tests/constructor':
       backgroundClass = 'testsBackground';
       break;
     case '/profile':
       backgroundClass = 'profileBackground';
       break;
     default:
-      backgroundClass = 'defaultBackground';
+      // For routes like /tests/take/:id
+      if (location.pathname.startsWith('/tests/take/')) {
+        backgroundClass = 'testsBackground';
+      } else if (location.pathname.startsWith('/tests/')) {
+        backgroundClass = 'testsBackground';
+      } else {
+        backgroundClass = 'defaultBackground';
+      }
   }
 
   return (
@@ -42,7 +50,7 @@ function AppWrapper() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route 
-            path="/articles" 
+            path="/articles/*" 
             element={
               <ProtectedRoute>
                 <Articles />
@@ -50,7 +58,7 @@ function AppWrapper() {
             } 
           />
           <Route 
-            path="/tests" 
+            path="/tests/*" 
             element={
               <ProtectedRoute>
                 <Tests />

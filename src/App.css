@@ -10,24 +10,45 @@
   background-color: #9c4a9f;
 }
 
+/* Background images with absolute paths */
 .loginBackground {
-  background-image: url('/public/assets/login_background.png'); /* путь из public */
+  background-color: #5a189a;
+  background-image: url('http://localhost:3000/assets/login_background.png');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
 }
 
 .articlesBackground {
-  background-image: url('/public/assets/background.png');
+  background-color: #9c4a9f;
+  background-image: url('http://localhost:3000/assets/background.png');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
 }
 
 .homeBackground {
-  background-image: url('/public/assets/background.png');
+  background-color: #9c4a9f;
+  background-image: url('http://localhost:3000/assets/background.png');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
 }
 
 .testsBackground {
-  background-image: url('/public/assets/background.png');
+  background-color: #9c4a9f;
+  background-image: url('http://localhost:3000/assets/background.png');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
 }
 
 .profileBackground {
-  background-image: url('/public/assets/background.png');
+  background-color: #9c4a9f;
+  background-image: url('http://localhost:3000/assets/background.png');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
 }
 
 .App-logo {
