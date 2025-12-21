@@ -115,42 +115,38 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) => {
     try {
       console.log('📨 Отправляем данные:', { 
         username: formData.username, 
-        email: formData.email || null, 
-        phone: formData.phone || null, 
+        email: formData.email, 
+        phone: formData.phone, 
         password: formData.password 
       });
 
       const result = await register(
         formData.username, 
         formData.password, 
-        formData.email || null, 
-        formData.phone || null
+        formData.email, 
+        formData.phone
       );
 
       if (result.success) {
         // ✅ УСПЕШНАЯ РЕГИСТРАЦИЯ
         console.log('✅ Регистрация успешна:', result);
         
-        if (result.requiresVerification) {
-          setSuccessMessage('Регистрация успешна! Проверьте ваш email для подтверждения.');
-        } else {
-          setSuccessMessage('Регистрация успешна! Добро пожаловать!');
-          
-          // Сброс формы
-          setFormData({
-            username: '',
-            email: '',
-            phone: '',
-            password: '',
-            confirmPassword: '',
-            consent: false
-          } as FormData);
-          
-          // РЕДИРЕКТ
-          setTimeout(() => {
-            window.location.href = '/';
-          }, 2000);
-        }
+        setSuccessMessage('Регистрация успешна! Добро пожаловать!');
+        
+        // Сброс формы
+        setFormData({
+          username: '',
+          email: '',
+          phone: '',
+          password: '',
+          confirmPassword: '',
+          consent: false
+        } as FormData);
+        
+        // РЕДИРЕКТ
+        setTimeout(() => {
+          window.location.href = '/';
+        }, 2000);
 
       } else {
         // ❌ ОШИБКА ОТ СЕРВЕРА

@@ -62,53 +62,55 @@ export interface FeedItem {
 
 // Test types
 export interface TestScale {
-  id: string;
+  id: number;  // Changed to number
   name: string;
-  min: number;
-  max: number;
-  interpretations: {
-    minScore: number;
-    maxScore: number;
-    description: string;
-  }[];
+}
+
+export interface TestResultInterpretation {
+  scale_id: number;  // Changed to number
+  min_score: number;
+  max_score: number;
+  text: string;
 }
 
 export interface TestQuestionOption {
-  id: string;
+  id: number;  // Changed to number
+  order: number;
   text: string;
-  isCorrect?: boolean;
-  score?: { [scaleId: string]: number }; // Score contribution to each scale
+  scores: number;  // Changed from score object to single number
 }
 
 export interface TestQuestion {
-  id: string;
+  id: number;
+  order: number;  // Added order field
   text: string;
   type: 'single' | 'multiple' | 'text';
+  scales: number[];  // Changed from scaleId to scales array
   options?: TestQuestionOption[];
-  correctAnswer?: string;
-  scaleId?: string; // Which scale this question contributes to
 }
 
+// // Test result from backend - new format
+// export interface TestResultFromBackend {
+//   scale_id: number;
+//   result_string: string;
+// }
+
 export interface Test {
-  id: string;
-  title: string;
+  _id: string;  // Changed from id to _id
+  name: string;  // Changed from title to name
   description: string;
-  duration?: string;
-  questions: number;
-  difficulty?: 'easy' | 'medium' | 'hard';
-  questionsList?: TestQuestion[];
-  scales?: TestScale[]; // Scoring scales for this test
+  author: string;  // Added author field
+  questions: TestQuestion[];
+  scales: TestScale[];
+  results: TestResultInterpretation[]; // For test creation
 }
 
 export interface TestResult {
-  id: string;
-  testId: string;
-  userId: number;
-  score: number;
-  completedAt: string;
-  answers: {
-    questionId: string;
-    answer: string | string[];
+  user_id: string;  // Changed structure
+  questions: {
+    question_id: number;
+    option_id: number;
   }[];
-  scaleScores?: { [scaleId: string]: number }; // Scores for each scale
+  // Results from backend processing
+  results?: [];
 }

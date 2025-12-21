@@ -11,6 +11,14 @@ interface TestTopic {
   count: number;
 }
 
+interface Survey {
+  _id: string;
+  name: string;
+  description: string;
+  author: string;
+  questionsCount?: number;
+}
+
 const TestForm: React.FC = () => {
   const navigate = useNavigate();
   
@@ -27,8 +35,8 @@ const TestForm: React.FC = () => {
 
   // State management
   const [activeTopic, setActiveTopic] = useState<string>('all');
-  const [tests, setTests] = useState<Test[]>([]);
-  const [filteredTests, setFilteredTests] = useState<Test[]>([]);
+  const [tests, setTests] = useState<Survey[]>([]);
+  const [filteredTests, setFilteredTests] = useState<Survey[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -37,13 +45,11 @@ const TestForm: React.FC = () => {
     const loadTests = async () => {
       try {
         setLoading(true);
-        // In a real implementation, you would fetch from API:
-        // const response = await apiService.getTests();
-        // const testData = await response.data;
+        // Fetch surveys from the backend API
+        const surveys = await apiService.getSurveys();
         
-        // For now, using empty array since we want to show only created tests
-        setTests([]);
-        setFilteredTests([]);
+        setTests(surveys);
+        setFilteredTests(surveys);
       } catch (err) {
         setError('Не удалось загрузить тесты');
         console.error('Error loading tests:', err);
@@ -77,9 +83,9 @@ const TestForm: React.FC = () => {
   };
 
   // Handle test selection
-  const handleSelectTest = (test: Test) => {
-    // Navigate to test taking page
-    navigate(`/tests/take/${test.id}`);
+  const handleSelectTest = (test: Survey) => {
+    // Navigate to test taking page using _id instead of id
+    navigate(`/tests/take/${test._id}`);
   };
 
   // Handle create test
@@ -184,19 +190,14 @@ const TestForm: React.FC = () => {
             <div className={styles.testList}>
               {filteredTests.map((test) => (
                 <div
-                  key={test.id}
+                  key={test._id}
                   className={styles.testCard}
                   onClick={() => handleSelectTest(test)}
                 >
-                  <h3 className={styles.testTitle}>{test.title}</h3>
+                  <h3 className={styles.testTitle}>{test.name}</h3>
                   <p className={styles.testDescription}>{test.description}</p>
-                  {test.scales && test.scales.length > 0 && (
-                    <div className={styles.testScales}>
-                      Шкалы: {test.scales.map(scale => scale.name).join(', ')}
-                    </div>
-                  )}
-                  <div className={styles.testMeta}>
-                    <span>❓ {test.questions} вопросов</span>
+                  <div className={styles.testAuthor}>
+                    Автор: {test.author}
                   </div>
                 </div>
               ))}

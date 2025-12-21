@@ -13,7 +13,7 @@ interface Section {
 }
 
 const ProfileForm: React.FC<ProfileFormProps> = ({ user }) => {
-  const { listSessions, revokeSession } = useAuth();
+  const { getProfile } = useAuth();
   const [activeSection, setActiveSection] = useState<string | null>(null);
   const [avatar, setAvatar] = useState<string | null>(null);
   const [selectedBackground, setSelectedBackground] = useState<string | null>(null);

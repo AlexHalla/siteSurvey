@@ -1,78 +1,91 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import styles from './TestConstructor.module.css';
-import { Test, TestQuestion, TestScale } from '../../types';
+import { Test, TestQuestion, TestScale, TestResultInterpretation, TestQuestionOption } from '../../types';
+import apiService from '../../services/api';
+import { useAuth } from '../../hooks/useAuth';
 
 const TestConstructor: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   
   // State for test properties
-  const [title, setTitle] = useState('');
+  const [name, setName] = useState('');  // Changed from title to name
   const [description, setDescription] = useState('');
   const [scales, setScales] = useState<TestScale[]>([
     {
-      id: 's1',
-      name: 'Основная шкала',
-      min: 0,
-      max: 10,
-      interpretations: [
-        { minScore: 0, maxScore: 3, description: 'Низкий уровень' },
-        { minScore: 4, maxScore: 6, description: 'Средний уровень' },
-        { minScore: 7, maxScore: 10, description: 'Высокий уровень' }
-      ]
+      id: 0,
+      name: 'Основная шкала'
     }
+  ]);
+  const [results, setResults] = useState<TestResultInterpretation[]>([
+    { scale_id: 0, min_score: 0, max_score: 3, text: 'Низкий уровень' },
+    { scale_id: 0, min_score: 4, max_score: 6, text: 'Средний уровень' },
+    { scale_id: 0, min_score: 7, max_score: 10, text: 'Высокий уровень' }
   ]);
   const [questions, setQuestions] = useState<TestQuestion[]>([
     {
-      id: 'q1',
+      id: 0,
+      order: 0,
       text: '',
       type: 'single',
-      scaleId: 's1',
+      scales: [0],
       options: [
-        { id: 'a', text: '', score: { s1: 1 } },
-        { id: 'b', text: '', score: { s1: 2 } }
+        { id: 0, order: 0, text: '', scores: 1 },
+        { id: 1, order: 1, text: '', scores: 2 }
       ]
     }
   ]);
   
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
 
-  // Handle scale changes
+  const { user } = useAuth();
+
+  // Load existing survey if editing
+  useEffect(() => {
+    if (id) {
+      const loadSurvey = async () => {
+        try {
+          setLoading(true);
+          const survey = await apiService.getSurveyById(id);
+          
+          setName(survey.name || '');
+          setDescription(survey.description || '');
+          
+          if (survey.scales) {
+            setScales(survey.scales);
+          }
+          
+          if (survey.results) {
+            setResults(survey.results);
+          }
+          
+          if (survey.questions) {
+            setQuestions(survey.questions);
+          }
+        } catch (err) {
+          setError('Не удалось загрузить тест для редактирования');
+          console.error('Error loading survey:', err);
+        } finally {
+          setLoading(false);
+        }
+      };
+      
+      loadSurvey();
+    }
+  }, [id]);
+
   const handleScaleNameChange = (index: number, name: string) => {
     const updatedScales = [...scales];
     updatedScales[index].name = name;
     setScales(updatedScales);
   };
 
-  const handleScaleRangeChange = (index: number, field: 'min' | 'max', value: string) => {
-    const updatedScales = [...scales];
-    updatedScales[index][field] = parseInt(value) || 0;
-    setScales(updatedScales);
-  };
-
-  const handleInterpretationChange = (scaleIndex: number, interpIndex: number, field: 'minScore' | 'maxScore', value: string) => {
-    const updatedScales = [...scales];
-    updatedScales[scaleIndex].interpretations[interpIndex][field] = parseInt(value) || 0;
-    setScales(updatedScales);
-  };
-
-  const handleInterpretationDescriptionChange = (scaleIndex: number, interpIndex: number, description: string) => {
-    const updatedScales = [...scales];
-    updatedScales[scaleIndex].interpretations[interpIndex].description = description;
-    setScales(updatedScales);
-  };
-
   const addScale = () => {
     const newScale: TestScale = {
-      id: `s${scales.length + 1}`,
-      name: '',
-      min: 0,
-      max: 10,
-      interpretations: [
-        { minScore: 0, maxScore: 5, description: 'Низкий уровень' },
-        { minScore: 6, maxScore: 10, description: 'Высокий уровень' }
-      ]
+      id: scales.length,
+      name: ''
     };
     setScales([...scales, newScale]);
   };
@@ -84,48 +97,54 @@ const TestConstructor: React.FC = () => {
     setScales(updatedScales);
   };
 
-  const addInterpretation = (scaleIndex: number) => {
-    const updatedScales = [...scales];
-    updatedScales[scaleIndex].interpretations.push({
-      minScore: 0,
-      maxScore: 0,
-      description: ''
-    });
-    setScales(updatedScales);
+  // Result interpretation handlers
+  const handleResultChange = (index: number, field: keyof TestResultInterpretation, value: string | number) => {
+    const updatedResults = [...results];
+    updatedResults[index] = {
+      ...updatedResults[index],
+      [field]: value
+    };
+    setResults(updatedResults);
   };
 
-  const removeInterpretation = (scaleIndex: number, interpIndex: number) => {
-    const updatedScales = [...scales];
-    if (updatedScales[scaleIndex].interpretations.length > 1) {
-      updatedScales[scaleIndex].interpretations.splice(interpIndex, 1);
-      setScales(updatedScales);
-    }
+  const addResult = () => {
+    const newResult: TestResultInterpretation = {
+      scale_id: 0,
+      min_score: 0,
+      max_score: 0,
+      text: ''
+    };
+    setResults([...results, newResult]);
   };
 
-  // Handle question text change
+  const removeResult = (index: number) => {
+    if (results.length <= 1) return;
+    const updatedResults = [...results];
+    updatedResults.splice(index, 1);
+    setResults(updatedResults);
+  };
+
   const handleQuestionTextChange = (index: number, text: string) => {
     const updatedQuestions = [...questions];
     updatedQuestions[index].text = text;
     setQuestions(updatedQuestions);
   };
 
-  // Handle question scale change (single scale selection)
-  const handleQuestionScaleChange = (index: number, scaleId: string) => {
+  const handleQuestionScaleToggle = (questionIndex: number, scaleId: number) => {
     const updatedQuestions = [...questions];
-    updatedQuestions[index].scaleId = scaleId;
+    const question = updatedQuestions[questionIndex];
     
-    // Update options to only show score for selected scale
-    if (updatedQuestions[index].options) {
-      updatedQuestions[index].options = updatedQuestions[index].options!.map(option => ({
-        ...option,
-        score: option.score ? { [scaleId]: option.score[scaleId] || 0 } : { [scaleId]: 0 }
-      }));
+    if (question.scales.includes(scaleId)) {
+      // Remove scale from question
+      question.scales = question.scales.filter(id => id !== scaleId);
+    } else {
+      // Add scale to question
+      question.scales = [...question.scales, scaleId];
     }
     
     setQuestions(updatedQuestions);
   };
 
-  // Handle question type change
   const handleQuestionTypeChange = (index: number, type: 'single' | 'multiple' | 'text') => {
     const updatedQuestions = [...questions];
     updatedQuestions[index].type = type;
@@ -135,34 +154,31 @@ const TestConstructor: React.FC = () => {
       delete updatedQuestions[index].options;
     } else if (!updatedQuestions[index].options) {
       // Add default options when changing from text to choice type
-      const scaleId = updatedQuestions[index].scaleId || scales[0]?.id || 's1';
       updatedQuestions[index].options = [
-        { id: 'a', text: '', score: { [scaleId]: 1 } },
-        { id: 'b', text: '', score: { [scaleId]: 2 } }
+        { id: 0, order: 0, text: '', scores: 1 },
+        { id: 1, order: 1, text: '', scores: 2 }
       ];
     }
     
     setQuestions(updatedQuestions);
   };
 
-  // Add new question
   const addQuestion = () => {
-    const scaleId = scales[0]?.id || 's1';
     const newQuestion: TestQuestion = {
-      id: `q${questions.length + 1}`,
+      id: questions.length,
+      order: questions.length,
       text: '',
       type: 'single',
-      scaleId: scaleId,
+      scales: [0],
       options: [
-        { id: 'a', text: '', score: { [scaleId]: 1 } },
-        { id: 'b', text: '', score: { [scaleId]: 2 } }
+        { id: 0, order: 0, text: '', scores: 1 },
+        { id: 1, order: 1, text: '', scores: 2 }
       ]
     };
     
     setQuestions([...questions, newQuestion]);
   };
 
-  // Remove question
   const removeQuestion = (index: number) => {
     if (questions.length <= 1) return;
     
@@ -171,31 +187,38 @@ const TestConstructor: React.FC = () => {
     setQuestions(updatedQuestions);
   };
 
-  // Add option to question
   const addOption = (questionIndex: number) => {
     const updatedQuestions = [...questions];
     const question = updatedQuestions[questionIndex];
     
     if (question.options) {
-      const newOptionId = String.fromCharCode(97 + question.options.length);
-      const scaleId = question.scaleId || scales[0]?.id || 's1';
-      question.options.push({ id: newOptionId, text: '', score: { [scaleId]: 0 } });
+      const newOptionId = question.options.length;
+      question.options.push({ 
+        id: newOptionId, 
+        order: newOptionId, 
+        text: '', 
+        scores: 0 
+      });
       setQuestions(updatedQuestions);
     }
   };
 
-  // Remove option from question
   const removeOption = (questionIndex: number, optionIndex: number) => {
     const updatedQuestions = [...questions];
     const question = updatedQuestions[questionIndex];
     
     if (question.options && question.options.length > 2) {
       question.options.splice(optionIndex, 1);
+      // Re-index remaining options
+      question.options = question.options.map((option, idx) => ({
+        ...option,
+        id: idx,
+        order: idx
+      }));
       setQuestions(updatedQuestions);
     }
   };
 
-  // Handle option text change
   const handleOptionTextChange = (questionIndex: number, optionIndex: number, text: string) => {
     const updatedQuestions = [...questions];
     const question = updatedQuestions[questionIndex];
@@ -206,24 +229,20 @@ const TestConstructor: React.FC = () => {
     }
   };
 
-  // Handle option score change for a specific scale
-  const handleOptionScoreChange = (questionIndex: number, optionIndex: number, scaleId: string, score: string) => {
+  const handleOptionScoreChange = (questionIndex: number, optionIndex: number, score: string) => {
     const updatedQuestions = [...questions];
     const question = updatedQuestions[questionIndex];
     
     if (question.options) {
-      if (!question.options[optionIndex].score) {
-        question.options[optionIndex].score = {};
-      }
-      question.options[optionIndex].score![scaleId] = parseInt(score) || 0;
+      question.options[optionIndex].scores = parseInt(score) || 0;
       setQuestions(updatedQuestions);
     }
   };
 
   // Save test
-  const saveTest = () => {
+  const saveTest = async () => {
     // Validate form
-    if (!title.trim()) {
+    if (!name.trim()) {
       setError('Введите название теста');
       return;
     }
@@ -240,13 +259,14 @@ const TestConstructor: React.FC = () => {
         setError(`Введите название шкалы ${i + 1}`);
         return;
       }
-      
-      for (let j = 0; j < scale.interpretations.length; j++) {
-        const interp = scale.interpretations[j];
-        if (!interp.description.trim()) {
-          setError(`Введите описание интерпретации ${j + 1} для шкалы ${scale.name}`);
-          return;
-        }
+    }
+    
+    // Validate results
+    for (let i = 0; i < results.length; i++) {
+      const result = results[i];
+      if (!result.text.trim()) {
+        setError(`Введите текст интерпретации ${i + 1}`);
+        return;
       }
     }
     
@@ -258,8 +278,8 @@ const TestConstructor: React.FC = () => {
         return;
       }
       
-      if (!question.scaleId) {
-        setError(`Выберите шкалу для вопроса ${i + 1}`);
+      if (question.scales.length === 0) {
+        setError(`Выберите хотя бы одну шкалу для вопроса ${i + 1}`);
         return;
       }
       
@@ -272,16 +292,43 @@ const TestConstructor: React.FC = () => {
         for (let j = 0; j < (question.options?.length || 0); j++) {
           const option = question.options![j];
           if (!option.text.trim()) {
-            setError(`Заполните вариант ответа ${String.fromCharCode(97 + j)} для вопроса ${i + 1}`);
+            setError(`Заполните вариант ответа ${j} для вопроса ${i + 1}`);
             return;
           }
         }
       }
     }
     
-    // In a real implementation, you would save to API
-    alert(id ? 'Тест успешно обновлен!' : 'Тест успешно создан!');
-    navigate('/tests');
+    try {
+      setLoading(true);
+      
+      // Prepare survey data
+      const surveyData = {
+        name,
+        description,
+        author: user?.id,
+        scales,
+        results,
+        questions
+      };
+      
+      if (id) {
+        // Update existing survey
+        await apiService.createSurvey(surveyData);
+        alert('Тест успешно обновлен!');
+      } else {
+        // Create new survey
+        await apiService.createSurvey(surveyData);
+        alert('Тест успешно создан!');
+      }
+      
+      navigate('/tests');
+    } catch (err) {
+      setError('Не удалось сохранить тест. Попробуйте еще раз.');
+      console.error('Error saving survey:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Cancel and return to tests list
@@ -290,6 +337,16 @@ const TestConstructor: React.FC = () => {
       navigate('/tests');
     }
   };
+
+  if (loading && id) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.header}>
+          <h1 className={styles.title}>Загрузка теста...</h1>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.container}>
@@ -309,8 +366,8 @@ const TestConstructor: React.FC = () => {
           <input
             type="text"
             className={styles.input}
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
             placeholder="Введите название теста"
           />
         </div>
@@ -338,7 +395,7 @@ const TestConstructor: React.FC = () => {
       {scales.map((scale, scaleIndex) => (
         <div key={scale.id} className={styles.questionSection}>
           <div className={styles.questionHeader}>
-            <h3 className={styles.questionTitle}>Шкала {scaleIndex + 1}</h3>
+            <h3 className={styles.questionTitle}>Шкала {scaleIndex}</h3>
             {scales.length > 1 && (
               <button 
                 className={styles.removeQuestionButton}
@@ -359,6 +416,44 @@ const TestConstructor: React.FC = () => {
               placeholder="Введите название шкалы"
             />
           </div>
+        </div>
+      ))}
+      
+      {/* Results section */}
+      <div className={styles.header}>
+        <h2 className={styles.title}>Интерпретации результатов</h2>
+        <button className={styles.addButton} onClick={addResult}>
+          + Добавить интерпретацию
+        </button>
+      </div>
+      
+      {results.map((result, resultIndex) => (
+        <div key={resultIndex} className={styles.questionSection}>
+          <div className={styles.questionHeader}>
+            <h3 className={styles.questionTitle}>Интерпретация {resultIndex}</h3>
+            {results.length > 1 && (
+              <button 
+                className={styles.removeQuestionButton}
+                onClick={() => removeResult(resultIndex)}
+              >
+                Удалить
+              </button>
+            )}
+          </div>
+          
+          <div className={styles.formGroup}>
+            <label className={styles.label}>Шкала</label>
+            <select
+              className={styles.select}
+              value={result.scale_id}
+              onChange={(e) => handleResultChange(resultIndex, 'scale_id', parseInt(e.target.value))}
+            >
+              <option value="">Выберите шкалу</option>
+              {scales.map((scale) => (
+                <option key={scale.id} value={scale.id}>{scale.name}</option>
+              ))}
+            </select>
+          </div>
           
           <div className={styles.formGroup} style={{ display: 'flex', gap: '1rem' }}>
             <div style={{ flex: 1 }}>
@@ -366,8 +461,8 @@ const TestConstructor: React.FC = () => {
               <input
                 type="number"
                 className={styles.input}
-                value={scale.min}
-                onChange={(e) => handleScaleRangeChange(scaleIndex, 'min', e.target.value)}
+                value={result.min_score}
+                onChange={(e) => handleResultChange(resultIndex, 'min_score', parseInt(e.target.value) || 0)}
               />
             </div>
             <div style={{ flex: 1 }}>
@@ -375,64 +470,21 @@ const TestConstructor: React.FC = () => {
               <input
                 type="number"
                 className={styles.input}
-                value={scale.max}
-                onChange={(e) => handleScaleRangeChange(scaleIndex, 'max', e.target.value)}
+                value={result.max_score}
+                onChange={(e) => handleResultChange(resultIndex, 'max_score', parseInt(e.target.value) || 0)}
               />
             </div>
           </div>
           
           <div className={styles.formGroup}>
-            <label className={styles.label}>Интерпретации</label>
-            {scale.interpretations.map((interp, interpIndex) => (
-              <div key={interpIndex} className={styles.optionItem} style={{ marginBottom: '1rem' }}>
-                <div style={{ display: 'flex', gap: '1rem', marginBottom: '0.5rem' }}>
-                  <div style={{ flex: 1 }}>
-                    <label className={styles.label}>От</label>
-                    <input
-                      type="number"
-                      className={styles.input}
-                      value={interp.minScore}
-                      onChange={(e) => handleInterpretationChange(scaleIndex, interpIndex, 'minScore', e.target.value)}
-                    />
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <label className={styles.label}>До</label>
-                    <input
-                      type="number"
-                      className={styles.input}
-                      value={interp.maxScore}
-                      onChange={(e) => handleInterpretationChange(scaleIndex, interpIndex, 'maxScore', e.target.value)}
-                    />
-                  </div>
-                  {scale.interpretations.length > 1 && (
-                    <button 
-                      className={styles.removeQuestionButton}
-                      onClick={() => removeInterpretation(scaleIndex, interpIndex)}
-                      style={{ alignSelf: 'flex-end' }}
-                    >
-                      ×
-                    </button>
-                  )}
-                </div>
-                <div>
-                  <label className={styles.label}>Описание</label>
-                  <input
-                    type="text"
-                    className={styles.input}
-                    value={interp.description}
-                    onChange={(e) => handleInterpretationDescriptionChange(scaleIndex, interpIndex, e.target.value)}
-                    placeholder="Введите описание интерпретации"
-                  />
-                </div>
-              </div>
-            ))}
-            <button 
-              className={styles.addButton} 
-              onClick={() => addInterpretation(scaleIndex)}
-              style={{ marginTop: '0.5rem' }}
-            >
-              + Добавить интерпретацию
-            </button>
+            <label className={styles.label}>Текст интерпретации</label>
+            <input
+              type="text"
+              className={styles.input}
+              value={result.text}
+              onChange={(e) => handleResultChange(resultIndex, 'text', e.target.value)}
+              placeholder="Введите текст интерпретации"
+            />
           </div>
         </div>
       ))}
@@ -447,7 +499,7 @@ const TestConstructor: React.FC = () => {
       {questions.map((question, questionIndex) => (
         <div key={question.id} className={styles.questionSection}>
           <div className={styles.questionHeader}>
-            <h3 className={styles.questionTitle}>Вопрос {questionIndex + 1}</h3>
+            <h3 className={styles.questionTitle}>Вопрос {questionIndex}</h3>
             {questions.length > 1 && (
               <button 
                 className={styles.removeQuestionButton}
@@ -470,17 +522,20 @@ const TestConstructor: React.FC = () => {
           </div>
           
           <div className={styles.formGroup}>
-            <label className={styles.label}>Шкала оценивания</label>
-            <select
-              className={styles.select}
-              value={question.scaleId || ''}
-              onChange={(e) => handleQuestionScaleChange(questionIndex, e.target.value)}
-            >
-              <option value="">Выберите шкалу</option>
-              {scales.map(scale => (
-                <option key={scale.id} value={scale.id}>{scale.name}</option>
+            <label className={styles.label}>Шкалы оценивания</label>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+              {scales.map((scale) => (
+                <label key={scale.id} style={{ display: 'flex', alignItems: 'center', marginRight: '1rem' }}>
+                  <input
+                    type="checkbox"
+                    checked={question.scales.includes(scale.id)}
+                    onChange={() => handleQuestionScaleToggle(questionIndex, scale.id)}
+                    style={{ marginRight: '0.5rem' }}
+                  />
+                  {scale.name}
+                </label>
               ))}
-            </select>
+            </div>
           </div>
           
           <div className={styles.formGroup}>
@@ -496,7 +551,7 @@ const TestConstructor: React.FC = () => {
             </select>
           </div>
           
-          {question.type !== 'text' && question.options && question.scaleId && (
+          {question.type !== 'text' && question.options && (
             <div className={styles.formGroup}>
               <label className={styles.label}>Варианты ответов</label>
               {question.options.map((option, optionIndex) => (
@@ -506,19 +561,18 @@ const TestConstructor: React.FC = () => {
                     className={styles.optionInput}
                     value={option.text}
                     onChange={(e) => handleOptionTextChange(questionIndex, optionIndex, e.target.value)}
-                    placeholder={`Вариант ${String.fromCharCode(97 + optionIndex)}`}
+                    placeholder={`Вариант ${optionIndex}`}
                     style={{ marginBottom: '0.5rem' }}
                   />
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                    <span style={{ minWidth: '100px' }}>{scales.find(s => s.id === question.scaleId)?.name || 'Шкала'}:</span>
+                    <span>Баллы:</span>
                     <input
                       type="number"
                       className={styles.input}
-                      value={option.score?.[question.scaleId!] || 0}
-                      onChange={(e) => handleOptionScoreChange(questionIndex, optionIndex, question.scaleId!, e.target.value)}
+                      value={option.scores}
+                      onChange={(e) => handleOptionScoreChange(questionIndex, optionIndex, e.target.value)}
                       style={{ width: '80px' }}
                     />
-                    <span>баллов</span>
                   </div>
                   {question.options && question.options.length > 2 && (
                     <button 
@@ -546,8 +600,9 @@ const TestConstructor: React.FC = () => {
         <button 
           className={styles.saveButton} 
           onClick={saveTest}
+          disabled={loading}
         >
-          {id ? 'Обновить тест' : 'Создать тест'}
+          {loading ? 'Сохранение...' : (id ? 'Обновить тест' : 'Создать тест')}
         </button>
         <button 
           className={styles.cancelButton} 

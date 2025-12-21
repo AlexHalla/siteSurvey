@@ -133,6 +133,14 @@
   line-height: 1.4;
 }
 
+.testAuthor {
+  font-size: 0.85rem;
+  color: #d1b3ff;
+  font-style: italic;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 0.8rem;
+}
+
 .testScales {
   font-size: 0.8rem;
   color: #d1b3ff;

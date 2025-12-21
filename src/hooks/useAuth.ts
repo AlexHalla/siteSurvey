@@ -1,17 +1,16 @@
 import { useState, useEffect } from 'react';
 import apiService from '../services/api';
-import { User, AuthResponse, Session } from '../types';
+import { User, AuthResponse } from '../types';
 
 interface UseAuthReturn {
   isAuthenticated: boolean;
   user: User | null;
   isLoading: boolean;
-  login: (identifier: string, password: string) => Promise<{ success: boolean; data?: AuthResponse; error?: string }>;
-  register: (username: string, password: string, email?: string | null, phone?: string | null) => Promise<{ success: boolean; data?: any; error?: string; requiresVerification?: boolean }>;
+  login: (identifier: string, password: string, deviceId?: string, deviceLabel?: string) => Promise<{ success: boolean; data?: AuthResponse; error?: string }>;
+  register: (username: string, password: string, email: string, phone: string) => Promise<{ success: boolean; data?: any; error?: string }>;
   logout: () => void;
   checkAuth: () => void;
-  listSessions: () => Promise<Session[]>;
-  revokeSession: (sessionId: string, reason?: string | null) => Promise<any>;
+  getProfile: () => Promise<User>;
 }
 
 export const useAuth = (): UseAuthReturn => {
@@ -24,21 +23,17 @@ export const useAuth = (): UseAuthReturn => {
   }, []);
 
   const checkAuth = (): void => {
-    const accessToken = localStorage.getItem('access_token');
-    // Check if we have a token and validate it with the backend
-    if (accessToken) {
+    // Check if we have user data in localStorage (indicating authenticated state)
+    const userData = localStorage.getItem('user');
+    if (userData) {
       try {
-        const userData = JSON.parse(localStorage.getItem('user') || 'null');
-        if (userData) {
-          setIsAuthenticated(true);
-          setUser(userData);
-        } else {
-          // If we have a token but no user data, clear everything
-          logout();
-        }
+        const parsedUser = JSON.parse(userData);
+        setIsAuthenticated(true);
+        setUser(parsedUser);
       } catch (error) {
-        console.error('Error parsing user data:', error);
-        logout();
+        // console.error('Error parsing user data:', error);
+        // Clear invalid user data
+        localStorage.removeItem('user');
       }
     } else {
       setIsAuthenticated(false);
@@ -47,15 +42,26 @@ export const useAuth = (): UseAuthReturn => {
     setIsLoading(false);
   };
 
-  const login = async (identifier: string, password: string) => {
+  const getProfile = async (): Promise<User> => {
+    try {
+      const profileData = await apiService.getProfile();
+      // Save user data to localStorage
+      localStorage.setItem('user', JSON.stringify(profileData));
+      setUser(profileData);
+      setIsAuthenticated(true);
+      return profileData;
+    } catch (error: any) {
+      //console.error('Error fetching profile:', error);
+      throw error;
+    }
+  };
+
+  const login = async (identifier: string, password: string, deviceId?: string, deviceLabel?: string) => {
     try {
       setIsLoading(true);
-      const response: AuthResponse = await apiService.login(identifier, password);
+      const response: AuthResponse = await apiService.login(identifier, password, deviceId, deviceLabel);
       
-      // Save tokens
-      apiService.setTokens(response.access_token, response.refresh_token);
-      
-      // Save user data
+      // Save user data to localStorage (no tokens since we're using cookies)
       localStorage.setItem('user', JSON.stringify(response.user));
       
       // Update state
@@ -64,77 +70,44 @@ export const useAuth = (): UseAuthReturn => {
       
       return { success: true, data: response };
     } catch (error: any) {
-      console.error('Login error:', error);
+      //console.error('Login error:', error);
       return { success: false, error: error.message };
     } finally {
       setIsLoading(false);
     }
   };
 
-  const register = async (username: string, password: string, email: string | null = null, phone: string | null = null) => {
+  const register = async (username: string, password: string, email: string, phone: string) => {
     try {
       setIsLoading(true);
-      // Convert empty strings to null to match apiService expectations
-      const emailParam = email === '' ? null : email;
-      const phoneParam = phone === '' ? null : phone;
-      const response: any = await apiService.register(username, password, emailParam, phoneParam);
+      const response: any = await apiService.register(username, password, email, phone);
       
-      // If registration requires verification, handle accordingly
-      if (response.requires_verification) {
-        return { success: true, data: response, requiresVerification: true };
-      }
-      
-      // If registration is complete, log the user in
-      if (response.access_token && response.refresh_token) {
-        apiService.setTokens(response.access_token, response.refresh_token);
+      // If registration is complete, save user data
+      if (response.user) {
         localStorage.setItem('user', JSON.stringify(response.user));
         setIsAuthenticated(true);
         setUser(response.user);
       }
       
-      return { success: true, data: response, requiresVerification: false };
+      return { success: true, data: response };
     } catch (error: any) {
-      console.error('Registration error:', error);
+      //console.error('Registration error:', error);
       return { success: false, error: error.message };
     } finally {
       setIsLoading(false);
     }
   };
 
-  const logout = (): void => {
-    apiService.clearTokens();
+  const logout = async () => {
+    // Clear user data from localStorage
+    await apiService.logout();
+    localStorage.removeItem('user');
+    // Update state
     setIsAuthenticated(false);
     setUser(null);
-  };
-
-  const listSessions = async (): Promise<Session[]> => {
-    try {
-      if (!isAuthenticated || !user) {
-        throw new Error('User not authenticated');
-      }
-      
-      const sessions: Session[] = await apiService.listSessions(user.id);
-      return sessions;
-    } catch (error: any) {
-      console.error('Error listing sessions:', error);
-      throw error;
-    }
-  };
-
-  const revokeSession = async (sessionId: string, reason?: string | null): Promise<any> => {
-    try {
-      if (!isAuthenticated || !user) {
-        throw new Error('User not authenticated');
-      }
-      
-      // Convert empty strings to null to match apiService expectations
-      const reasonParam = reason === '' ? null : reason;
-      const result = await apiService.revokeSession(sessionId, reasonParam);
-      return result;
-    } catch (error: any) {
-      console.error('Error revoking session:', error);
-      throw error;
-    }
+    
+    // Note: The actual cookie clearing should be handled by the backend
+    // when it responds to a logout request. We're just clearing our local state.
   };
 
   return {
@@ -145,7 +118,6 @@ export const useAuth = (): UseAuthReturn => {
     register,
     logout,
     checkAuth,
-    listSessions,
-    revokeSession
+    getProfile
   };
 };
