@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import styles from './TestConstructor.module.css';
 import { Test, TestQuestion, TestScale, TestResultInterpretation, TestQuestionOption } from '../../types';
 import apiService from '../../services/api';
-import { useAuth } from '../../hooks/useAuth';
+import { useAuth } from '../../contexts/AuthContext';
 
 const TestConstructor: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -306,7 +306,8 @@ const TestConstructor: React.FC = () => {
       const surveyData = {
         name,
         description,
-        author: user?.id,
+        author_id: user?.id,
+        author: user?.username,
         scales,
         results,
         questions

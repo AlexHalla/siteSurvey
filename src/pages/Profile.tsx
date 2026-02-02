@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../hooks/useAuth';
+import { useAuth } from '../contexts/AuthContext';
 import ProfileForm from '../components/Profile/ProfileForm';
 import { User } from '../types';
 
@@ -8,7 +8,9 @@ interface BackgroundChangeEvent extends CustomEvent {
 }
 
 const Profile: React.FC = () => {
-  const { user } = useAuth();
+  const { user, getProfile, isLoading } = useAuth();
+  const [profileUser, setProfileUser] = useState<User | null>(user || null);
+  const [loading, setLoading] = useState<boolean>(true);
   const [background, setBackground] = useState<string | null>(null);
 
   useEffect(() => {
@@ -20,7 +22,7 @@ const Profile: React.FC = () => {
 
     // Listen for background change events
     const handleBackgroundChange = (event: BackgroundChangeEvent) => {
-      setBackground(event.detail);
+      setBackground(event.detail as string);
     };
 
     window.addEventListener('backgroundChange', handleBackgroundChange as EventListener);
@@ -31,6 +33,40 @@ const Profile: React.FC = () => {
     };
   }, []);
 
+  useEffect(() => {
+    const loadProfile = async () => {
+      try {
+        const profileData = await getProfile();
+        setProfileUser(profileData);
+      } catch (error) {
+        console.error('Error loading profile:', error);
+        if (user) {
+          setProfileUser(user);
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (!isLoading) {
+      loadProfile();
+    }
+  }, [isLoading]); 
+
+  if (loading) {
+    return (
+      <div style={{ 
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'rgba(60, 30, 100, 0.8)'
+      }}>
+        <div style={{ color: 'white', fontSize: '1.5rem' }}>Загрузка профиля...</div>
+      </div>
+    );
+  }
+
   return (
     <div style={{ 
       minHeight: '100vh',
@@ -39,7 +75,7 @@ const Profile: React.FC = () => {
       backgroundPosition: 'center',
       backgroundRepeat: 'no-repeat'
     }}>
-      <ProfileForm user={user as User} />
+      <ProfileForm user={profileUser as User} />
     </div>
   );
 };

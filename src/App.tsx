@@ -7,12 +7,12 @@ import Tests from './pages/Tests';
 import Login from './pages/Login';
 import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute';
 import Profile from './pages/Profile';
+import { AuthProvider } from './contexts/AuthContext';
 import './App.css';
 
 function AppWrapper() {
   const location = useLocation();
 
-  // Выбираем фон в зависимости от маршрута
   let backgroundClass = '';
   switch (location.pathname) {
     case '/':
@@ -32,7 +32,6 @@ function AppWrapper() {
       backgroundClass = 'profileBackground';
       break;
     default:
-      // For routes like /tests/take/:id
       if (location.pathname.startsWith('/tests/take/')) {
         backgroundClass = 'testsBackground';
       } else if (location.pathname.startsWith('/tests/')) {
@@ -82,7 +81,9 @@ function AppWrapper() {
 function App() {
   return (
     <Router>
-      <AppWrapper />
+      <AuthProvider>
+        <AppWrapper />
+      </AuthProvider>
     </Router>
   );
 }

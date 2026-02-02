@@ -448,6 +448,89 @@
   border-bottom: 1px solid rgba(255,255,255,0.2);
 }
 
+.sessionList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.confirmDialogOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+
+.confirmDialog {
+  background: rgba(45, 20, 90, 0.98);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 20px;
+  padding: 2.5rem;
+  min-width: 350px;
+  max-width: 95vw;
+  text-align: center;
+  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.6);
+  animation: modalAppear 0.3s ease-out;
+  position: relative;
+  z-index: 10000;
+}
+
+.confirmDialog h3 {
+  margin: 0 0 1rem 0;
+  color: #fff;
+  font-size: 1.3rem;
+}
+
+.confirmDialog p {
+  margin: 0 0 1.5rem 0;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1rem;
+}
+
+.confirmDialogButtons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.confirmButton, .cancelButton {
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.confirmButton {
+  background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+}
+
+.confirmButton:hover {
+  background: linear-gradient(135deg, #ff5252, #e53935);
+  box-shadow: 0 0 10px rgba(255, 82, 82, 0.5);
+}
+
+.cancelButton {
+  background: linear-gradient(135deg, #7b2cbf, #9d4edd);
+}
+
+.cancelButton:hover {
+  background: linear-gradient(135deg, #9d4edd, #b26fff);
+  box-shadow: 0 0 10px rgba(180, 124, 255, 0.5);
+}
+
 @media (max-width: 768px) {
   .profileContainer {
     flex-direction: column;
@@ -637,5 +720,40 @@
   
   .achievementsDescription {
     font-size: 0.9rem;
+  }
+  
+  .confirmDialog {
+    padding: 1.5rem;
+    min-width: 250px;
+    margin: 0 1rem;
+  }
+  
+  .confirmDialog h3 {
+    font-size: 1.1rem;
+  }
+  
+  .confirmDialog p {
+    font-size: 0.9rem;
+  }
+  
+  .confirmDialogButtons {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .confirmButton, .cancelButton {
+    padding: 12px;
+    font-size: 0.9rem;
+  }
+}
+
+@keyframes modalAppear {
+  from {
+    opacity: 0;
+    transform: scale(0.8) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
   }
 }

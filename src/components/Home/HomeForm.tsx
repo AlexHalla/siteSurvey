@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../hooks/useAuth';
+import { useAuth } from '../../contexts/AuthContext';
 import styles from './Home.module.css';
 import { User, NewsItem, FeedItem } from '../../types';
 
@@ -8,7 +8,6 @@ const HomeForm: React.FC = () => {
   const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
 
-  // Mock data for news and feed
   const [news] = useState<NewsItem[]>([
     {
       id: 1,
@@ -37,7 +36,7 @@ const HomeForm: React.FC = () => {
       title: 'Как улучшить память',
       author: 'Др. Иванов',
       date: '2025-10-28',
-      image: '/assets/article1.jpg'
+      image: '/assets/article.png'
     },
     {
       id: 2,
@@ -45,14 +44,14 @@ const HomeForm: React.FC = () => {
       title: 'Вебинар по управлению стрессом',
       date: '2025-11-05',
       time: '18:00',
-      image: '/assets/event1.jpg'
+      image: '/assets/article.png'
     },
     {
       id: 3,
       type: 'image',
       title: 'Инфографика: Типы личности',
       date: '2025-10-27',
-      image: '/assets/image1.jpg'
+      image: '/assets/article.png'
     },
     {
       id: 4,
@@ -60,7 +59,7 @@ const HomeForm: React.FC = () => {
       title: 'Психология сна',
       author: 'Др. Петрова',
       date: '2025-10-26',
-      image: '/assets/article2.jpg'
+      image: '/assets/article.png'
     }
   ]);
 
@@ -72,9 +71,7 @@ const HomeForm: React.FC = () => {
     navigate('/profile');
   };
 
-  // Handle click on feed item - navigate to articles page with the selected item
   const handleFeedItemClick = (item: FeedItem) => {
-    // Map feed item ID to article ID (in a real app, this would be handled by a database)
     const articleIdMap: Record<number, string> = {
       1: '4',
       2: '5',

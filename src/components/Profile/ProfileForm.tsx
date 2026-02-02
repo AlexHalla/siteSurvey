@@ -1,10 +1,22 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useAuth } from '../../hooks/useAuth';
+import { useAuth } from '../../contexts/AuthContext';
+import apiService from '../../services/api';
 import styles from './Profile.module.css';
 import { User } from '../../types';
 
 interface ProfileFormProps {
   user: User;
+}
+
+interface Session {
+  id: string;
+  device_id?: string | null;
+  device_label?: string | null;
+  user_agent: string;
+}
+
+interface Profile {
+  display_name: string;
 }
 
 interface Section {
@@ -14,22 +26,51 @@ interface Section {
 
 const ProfileForm: React.FC<ProfileFormProps> = ({ user }) => {
   const { getProfile } = useAuth();
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [activeSection, setActiveSection] = useState<string | null>(null);
   const [avatar, setAvatar] = useState<string | null>(null);
   const [selectedBackground, setSelectedBackground] = useState<string | null>(null);
   const [isAvatarMenuOpen, setIsAvatarMenuOpen] = useState(false);
+  const [sessions, setSessions] = useState<Session[]>([]);
+  const [currentSessionId, setCurrentSessionId] = useState<string>('');
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [sessionToRevoke, setSessionToRevoke] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Check if device is mobile
   const isMobile = window.innerWidth <= 768;
 
-  // Load saved background from localStorage on component mount
   useEffect(() => {
     const savedBackground = localStorage.getItem('profileBackground');
     if (savedBackground) {
       setSelectedBackground(savedBackground);
     }
   }, []);
+
+  useEffect(() => {
+    const loadSessions = async () => {
+      try {
+        const profileData: any = await getProfile();
+        if (profileData.sessions) {
+          const allSessions = profileData.sessions.sessions || profileData.sessions || [];
+          setSessions(allSessions);
+
+          const profile = profileData.profile;
+          setProfile(profile);
+          console.log(profile);
+
+          const userProfile = localStorage.getItem('userProfile');
+          if (userProfile) {
+            const parsedProfile = JSON.parse(userProfile);
+            setCurrentSessionId(parsedProfile.current_session_id || '');
+          }
+        }
+      } catch (error) {
+        console.error('Error loading sessions:', error);
+      }
+    };
+
+    loadSessions();
+  }, [getProfile]);
 
   const sections: Section[] = [
     { id: 'personalization', title: 'Персонализация' },
@@ -70,24 +111,49 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ user }) => {
 
   const handleGenerateAvatar = () => {
     setIsAvatarMenuOpen(false);
-    // Placeholder for avatar generation functionality
     console.log('Generate avatar functionality will be implemented later');
   };
 
   const handleBackgroundSelect = (background: string) => {
     setSelectedBackground(background);
-    // Change background immediately without requiring save
     window.dispatchEvent(new CustomEvent('backgroundChange', { detail: background }));
-    // Also save to localStorage immediately
     localStorage.setItem('profileBackground', background);
   };
 
   const handleSave = () => {
-    // Save other form data here if needed
     console.log('Profile data saved');
   };
 
-  // Close avatar menu when clicking outside
+  const handleRevokeSession = (sessionId: string) => {
+    setSessionToRevoke(sessionId);
+    setShowConfirmDialog(true);
+  };
+
+  const confirmRevokeSession = async () => {
+    if (!sessionToRevoke) return;
+    
+    try {
+      const success = await apiService.revokeSpecificSession(sessionToRevoke);
+      if (success) {
+        // Remove session from local state
+        setSessions(prevSessions => 
+          prevSessions.filter(session => session.id !== sessionToRevoke)
+        );
+      }
+    } catch (error) {
+      console.error('Error revoking session:', error);
+      alert('Ошибка при завершении сессии');
+    }
+    
+    setShowConfirmDialog(false);
+    setSessionToRevoke(null);
+  };
+
+  const cancelRevokeSession = () => {
+    setShowConfirmDialog(false);
+    setSessionToRevoke(null);
+  };
+
   useEffect(() => {
     const handleClickOutside = () => {
       if (isAvatarMenuOpen) {
@@ -185,10 +251,11 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ user }) => {
           </div>
         );
       case 'sessions':
+        const otherSessions = sessions.filter(session => session.id !== currentSessionId);
+        
         return (
           <div>
             <h2 className={styles.panelHeader}>Активные сессии</h2>
-            <p>Здесь будет список активных сессий пользователя.</p>
             <div className={styles.formGroup}>
               <h3 className={styles.sessionSectionTitle}>Текущая сессия</h3>
               <div className={styles.sessionItem}>
@@ -210,10 +277,37 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ user }) => {
             </div>
             <div className={styles.formGroup}>
               <h3 className={styles.sessionSectionTitle}>Другие сессии</h3>
-              <div className={styles.sessionNoSessions}>
-                <p>Нет других активных сессий</p>
-              </div>
+              {otherSessions.length > 0 ? (
+                <div className={styles.sessionList}>
+                  {otherSessions.map(session => (
+                    <div key={session.id} className={styles.sessionItem}>
+                      <div className={styles.sessionDeviceInfo}>
+                        <p className={styles.sessionDeviceName}>
+                          {session.device_label || session.device_id || 'Неизвестное устройство'}
+                        </p>
+                        <p className={styles.sessionDeviceDetails}>
+                          {session.user_agent}
+                        </p>
+                      </div>
+                      <div className={styles.sessionActions}>
+                        <button 
+                          className={`${styles.saveButton} ${styles.sessionActionButton}`}
+                          onClick={() => handleRevokeSession(session.id)}
+                        >
+                          Завершить
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className={styles.sessionNoSessions}>
+                  <p>Нет других активных сессий</p>
+                </div>
+              )}
             </div>
+            
+
           </div>
         );
       default:
@@ -222,107 +316,133 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ user }) => {
   };
 
   return (
-    <div className={styles.profileContainer}>
-      {/* Left Panel - Avatar and Username */}
-      <div className={styles.leftPanel}>
-        <div className={styles.userInfoContainer}>
-          <div className={styles.avatarUploadWrapper}>
-            <div className={styles.avatarContainer}>
-              <div 
-                className={styles.avatar}
-                onClick={handleAvatarClick}
-                style={{ backgroundImage: avatar ? `url(${avatar})` : 'none' }}
-              >
-                {!avatar && '👤'}
+    <>
+      <div className={styles.profileContainer}>
+        {/* Left Panel - Avatar and Username */}
+        <div className={styles.leftPanel}>
+          <div className={styles.userInfoContainer}>
+            <div className={styles.avatarUploadWrapper}>
+              <div className={styles.avatarContainer}>
+                <div 
+                  className={styles.avatar}
+                  onClick={handleAvatarClick}
+                  style={{ backgroundImage: avatar ? `url(${avatar})` : 'none' }}
+                >
+                  {!avatar && '👤'}
+                </div>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleFileChange}
+                  className={styles.fileInput}
+                  accept="image/*"
+                />
               </div>
-              <input
-                type="file"
-                ref={fileInputRef}
-                onChange={handleFileChange}
-                className={styles.fileInput}
-                accept="image/*"
+              <div 
+                className={styles.avatarUploadIcon}
+                onClick={handleAvatarIconClick}
               />
-            </div>
-            <div 
-              className={styles.avatarUploadIcon}
-              onClick={handleAvatarIconClick}
-            />
-            <div className={`${styles.avatarMenu} ${isAvatarMenuOpen ? styles.open : ''}`}>
-              <div 
-                className={styles.avatarMenuItem}
-                onClick={handleUploadPhoto}
-              >
-                Загрузить своё фото
-              </div>
-              <div 
-                className={styles.avatarMenuItem}
-                onClick={handleGenerateAvatar}
-              >
-                Сгенерировать аватар
+              <div className={`${styles.avatarMenu} ${isAvatarMenuOpen ? styles.open : ''}`}>
+                <div 
+                  className={styles.avatarMenuItem}
+                  onClick={handleUploadPhoto}
+                >
+                  Загрузить своё фото
+                </div>
+                <div 
+                  className={styles.avatarMenuItem}
+                  onClick={handleGenerateAvatar}
+                >
+                  Сгенерировать аватар
+                </div>
               </div>
             </div>
-          </div>
-          <div className={styles.username}>
-            {user?.username || 'Пользователь'}
-          </div>
-          {/* Achievements section similar to home page */}
-          <div className={styles.achievements}>
-            <span className={styles.achievementBadge}>🏆 5</span>
-            <span className={styles.achievementBadge}>⭐ 12</span>
-            <span className={styles.achievementBadge}>🏅 3</span>
-          </div>
-        </div>
-        <div className={styles.achievementsSection}>
-          {/* This section can be used for additional achievements or information */}
-          <h3 className={styles.achievementsTitle}>Ваши достижения</h3>
-          <p className={styles.achievementsDescription}>
-            Продолжайте активно использовать сайт, чтобы получить больше достижений!
-          </p>
-        </div>
-      </div>
-
-      {/* Right Panel - Sections and Content */}
-      <div className={styles.rightPanel}>
-        <div className={styles.sectionsList}>
-          {sections.map((section) => (
-            <div
-              key={section.id}
-              className={`${styles.sectionItem} ${activeSection === section.id ? styles.active : ''}`}
-              onClick={() => setActiveSection(activeSection === section.id ? null : section.id)}
-            >
-              {section.title}
+            <div className={styles.username}>
+              {profile?.display_name || 'Пользователь'}
             </div>
-          ))}
+            {/* Achievements section similar to home page */}
+            <div className={styles.achievements}>
+              <span className={styles.achievementBadge}>🏆 5</span>
+              <span className={styles.achievementBadge}>⭐ 12</span>
+              <span className={styles.achievementBadge}>🏅 3</span>
+            </div>
+          </div>
+          <div className={styles.achievementsSection}>
+            {/* This section can be used for additional achievements or information */}
+            <h3 className={styles.achievementsTitle}>Ваши достижения</h3>
+            <p className={styles.achievementsDescription}>
+              Продолжайте активно использовать сайт, чтобы получить больше достижений!
+            </p>
+          </div>
         </div>
 
-        {/* For mobile, show content below each button */}
-        {isMobile ? (
-          <div className={styles.contentPanel}>
+        {/* Right Panel - Sections and Content */}
+        <div className={styles.rightPanel}>
+          <div className={styles.sectionsList}>
             {sections.map((section) => (
-              activeSection === section.id && (
+              <div
+                key={section.id}
+                className={`${styles.sectionItem} ${activeSection === section.id ? styles.active : ''}`}
+                onClick={() => setActiveSection(activeSection === section.id ? null : section.id)}
+              >
+                {section.title}
+              </div>
+            ))}
+          </div>
+
+          {/* For mobile, show content below each button */}
+          {isMobile ? (
+            <div className={styles.contentPanel}>
+              {sections.map((section) => (
+                activeSection === section.id && (
+                  <div
+                    key={section.id}
+                    className={`${styles.panelContent} ${activeSection === section.id ? styles.active : ''}`}
+                  >
+                    {renderSectionContent(section.id)}
+                  </div>
+                )
+              ))}
+            </div>
+          ) : (
+            <div className={styles.contentPanel}>
+              {sections.map((section) => (
                 <div
                   key={section.id}
                   className={`${styles.panelContent} ${activeSection === section.id ? styles.active : ''}`}
                 >
                   {renderSectionContent(section.id)}
                 </div>
-              )
-            ))}
-          </div>
-        ) : (
-          <div className={styles.contentPanel}>
-            {sections.map((section) => (
-              <div
-                key={section.id}
-                className={`${styles.panelContent} ${activeSection === section.id ? styles.active : ''}`}
-              >
-                {renderSectionContent(section.id)}
-              </div>
-            ))}
-          </div>
-        )}
+              ))}
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+      
+      {/* Full-screen Confirmation Dialog */}
+      {showConfirmDialog && (
+        <div className={styles.confirmDialogOverlay}>
+          <div className={styles.confirmDialog}>
+            <h3>Подтверждение</h3>
+            <p>Вы точно хотите завершить сессию?</p>
+            <div className={styles.confirmDialogButtons}>
+              <button 
+                className={`${styles.saveButton} ${styles.confirmButton}`}
+                onClick={confirmRevokeSession}
+              >
+                Да
+              </button>
+              <button 
+                className={`${styles.saveButton} ${styles.cancelButton}`}
+                onClick={cancelRevokeSession}
+              >
+                Нет
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 

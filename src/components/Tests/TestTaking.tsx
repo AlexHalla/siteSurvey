@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import styles from './TestTaking.module.css';
 import { Test, TestQuestion, TestScale } from '../../types';
 import apiService from '../../services/api';
-import { useAuth } from '../../hooks/useAuth';
+import { useAuth } from '../../contexts/AuthContext';
 
 const TestTaking: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -88,19 +88,16 @@ const TestTaking: React.FC = () => {
     }
   };
 
-  // Submit test
   const submitTest = async () => {
     if (!test || !id) return;
     
     try {
-      // Prepare result data in the new format
       const resultData = {
-        user_id: user?.id?.toString() || 'anonymous',
+        user_id: user?.id?.toString(),
         questions: Object.entries(answers)
           .filter(([_, answer]) => typeof answer === 'number' || Array.isArray(answer))
           .map(([questionId, answer]) => {
             if (Array.isArray(answer)) {
-              // For multiple choice, we'll send the first selected option
               return {
                 question_id: parseInt(questionId),
                 option_id: answer[0] || 0

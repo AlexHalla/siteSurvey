@@ -1,0 +1,306 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/": {
+      "get": {
+        "operationId": "AppController_getHello",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Health check endpoint",
+        "tags": [
+          "Health"
+        ]
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "operationId": "AuthController_login",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "description": "User credentials",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "identifier",
+                  "password"
+                ],
+                "properties": {
+                  "identifier": {
+                    "type": "string",
+                    "example": "user@example.com"
+                  },
+                  "password": {
+                    "type": "string",
+                    "example": "password123"
+                  },
+                  "deviceId": {
+                    "type": "string",
+                    "example": "device-123"
+                  },
+                  "deviceLabel": {
+                    "type": "string",
+                    "example": "iPhone 12"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully authenticated"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "summary": "Authenticate user and create session",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/auth/register": {
+      "post": {
+        "operationId": "AuthController_register",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "description": "User registration data",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "username",
+                  "password",
+                  "email",
+                  "phone"
+                ],
+                "properties": {
+                  "username": {
+                    "type": "string",
+                    "example": "john_doe"
+                  },
+                  "password": {
+                    "type": "string",
+                    "example": "password123"
+                  },
+                  "email": {
+                    "type": "string",
+                    "example": "user@example.com"
+                  },
+                  "phone": {
+                    "type": "string",
+                    "example": "+79999999999"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User registered successfully"
+          },
+          "400": {
+            "description": "Bad request"
+          }
+        },
+        "summary": "Register a new user",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/auth/profile": {
+      "get": {
+        "operationId": "AuthController_getProfile",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "User profile and active sessions"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "summary": "Get user profile and active sessions",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/api/v1/survey-service/surveys": {
+      "get": {
+        "description": "Retrieves all surveys from the survey service",
+        "operationId": "SurveyServiceController_getAllSurveys",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Return all surveys."
+          }
+        },
+        "summary": "Get all surveys",
+        "tags": [
+          "Survey Service"
+        ]
+      },
+      "post": {
+        "description": "Creates a new survey in the survey service",
+        "operationId": "SurveyServiceController_createSurvey",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "description": "Survey data",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The survey has been successfully created."
+          },
+          "400": {
+            "description": "Bad request."
+          }
+        },
+        "summary": "Create a new survey",
+        "tags": [
+          "Survey Service"
+        ]
+      }
+    },
+    "/api/v1/survey-service/surveys/{id}": {
+      "get": {
+        "description": "Retrieves a specific survey by its ID from the survey service",
+        "operationId": "SurveyServiceController_getSurveyById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Survey ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Return the survey."
+          },
+          "404": {
+            "description": "Survey not found."
+          }
+        },
+        "summary": "Get a survey by id",
+        "tags": [
+          "Survey Service"
+        ]
+      }
+    },
+    "/api/v1/survey-service/surveys/{id}/results": {
+      "post": {
+        "description": "Saves a user's result for a specific survey",
+        "operationId": "SurveyServiceController_saveUserResult",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Survey ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Survey result data",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The result has been successfully saved."
+          },
+          "400": {
+            "description": "Bad request."
+          }
+        },
+        "summary": "Save user survey result",
+        "tags": [
+          "Survey Service"
+        ]
+      },
+      "get": {
+        "description": "Retrieves results for a specific survey",
+        "operationId": "SurveyServiceController_getSurveyResults",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Survey ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Return survey results."
+          }
+        },
+        "summary": "Get survey results",
+        "tags": [
+          "Survey Service"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "Frontoback Service (BFF)",
+    "description": "Backend-for-Frontend service API documentation",
+    "version": "1.0",
+    "contact": {
+
+    }
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "securitySchemes": {
+      "bearer": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http"
+      }
+    },
+    "schemas": {
+      "Object": {
+        "type": "object",
+        "properties": {
+
+        }
+      }
+    }
+  }
+}

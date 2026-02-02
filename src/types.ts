@@ -7,6 +7,15 @@ export interface User {
   avatar?: string;
 }
 
+
+export interface Profile {
+  id: number,
+  username: string,
+  email?: string,
+  avatar?: string,
+  sessions: Array<Session>
+}
+
 // Authentication types
 export interface LoginCredentials {
   identifier: string;
@@ -39,7 +48,6 @@ export interface Session {
   id: string;
   device: string;
   lastActive: string;
-  current: boolean;
 }
 
 // News and Feed types

@@ -1,4 +1,6 @@
-const API_BASE_URL = ''; // Replace with actual backend URL
+// const API_BASE_URL = 'https://psycho-bff.setihome.ru'; // Replace with actual backend URL
+
+const API_BASE_URL = 'http://localhost:3002';
 
 class ApiService {
   baseURL: string;
@@ -40,14 +42,16 @@ class ApiService {
       throw new Error(`Login failed with status ${response.status}`);
     }
 
-    return await response.json();
+    const result = await response.json();
+    
+    return result;
   }
 
   async logout(): Promise<any> {
     const response = await this.request('/auth/logout', {
       method: 'POST'
     });
-
+    
     return await response.json();
   }
 
@@ -61,19 +65,42 @@ class ApiService {
       throw new Error(`Registration failed with status ${response.status}`);
     }
 
-    return await response.json();
+    const result = await response.json();
+    
+    return result;
   }
 
   async getProfile(): Promise<any> {
-    const response = await this.request('/auth/profile', {
-      method: 'GET'
+    try {
+      const res = await this.request('/personalization/profile', {
+        method: 'GET',
+      });
+
+      const data = await res.json();
+      return data;
+    } catch (err: any) {
+      throw new Error(`Failed to fetch profile with status ${err?.status}`);
+    }
+  }
+
+  async checkAuth(): Promise<boolean> {
+    try {
+      const response = await this.request('/auth/check-auth', {
+        method: 'POST',
+      });
+
+      return response.ok;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  async revokeSpecificSession(sessionId: string) {
+    const response = await this.request(`/auth/revoke-specific-session/${sessionId}`, {
+      method: 'POST',
     });
 
-    if (!response.ok) {
-      throw new Error(`Failed to fetch profile with status ${response.status}`);
-    }
-
-    return await response.json();
+    return response.ok;
   }
 
   // Survey endpoints
@@ -121,7 +148,7 @@ class ApiService {
     });
 
     if (!response.ok) {
-      throw new Error(`Failed to save survey result with status ${response.status}`);
+      throw new Error(`Failed to save survey result with status ${response.status}, ${await response.text()}`);
     }
 
     return await response.json();

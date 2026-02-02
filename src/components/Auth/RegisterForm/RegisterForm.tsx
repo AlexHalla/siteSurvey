@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import styles from './RegisterForm.module.css';
-import { useAuth } from '../../../hooks/useAuth';
+import { useAuth } from '../../../contexts/AuthContext';
 
 interface RegisterFormProps {
   onSwitchToLogin: () => void;

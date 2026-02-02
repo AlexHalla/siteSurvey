@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useAuth } from '../../../hooks/useAuth';
+import { useAuth } from '../../../contexts/AuthContext';
 import styles from './LoginForm.module.css';
 
 interface LoginFormProps {
@@ -72,24 +72,17 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister }) => {
     setSuccessMessage('');
 
     try {
-      console.log('📨 Отправляем данные для входа:', formData);
-
       const result = await login(formData.identifier, formData.password);
       
-      if (result.success) {
-        // ✅ УСПЕШНЫЙ ВХОД
-        console.log('✅ Вход успешен:', result);
+      if (result.success) {        
+        setSuccessMessage('Добро пожаловать!');
         
-        setSuccessMessage('Добро пожаловать!'); // Упрощенное сообщение
-        
-        // 🎯 ПЕРЕНАПРАВЛЕНИЕ НА ГЛАВНУЮ
         setTimeout(() => {
-          console.log('🔄 Перенаправляем на главную страницу...');
           window.location.href = '/';
         }, 1500);
 
       } else {
-        setErrors({ submit: result.error || 'Неверные учетные данные' });
+        setErrors({ submit: 'Неверные учетные данные' });
       }
 
     } catch (error) {
