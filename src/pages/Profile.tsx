@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import ProfileForm from '../components/Profile/ProfileForm';
-import { User } from '../types';
 
 interface BackgroundChangeEvent extends CustomEvent {
   detail: string;
@@ -9,7 +8,7 @@ interface BackgroundChangeEvent extends CustomEvent {
 
 const Profile: React.FC = () => {
   const { user, getProfile, isLoading } = useAuth();
-  const [profileUser, setProfileUser] = useState<User | null>(user || null);
+  const [profileUser, setProfileUser] = useState(user || null);
   const [loading, setLoading] = useState<boolean>(true);
   const [background, setBackground] = useState<string | null>(null);
 
@@ -36,8 +35,8 @@ const Profile: React.FC = () => {
   useEffect(() => {
     const loadProfile = async () => {
       try {
-        const profileData = await getProfile();
-        setProfileUser(profileData);
+        const profileData: any = await getProfile();
+        setProfileUser(profileData?.profile ?? user ?? null);
       } catch (error) {
         console.error('Error loading profile:', error);
         if (user) {
@@ -51,7 +50,7 @@ const Profile: React.FC = () => {
     if (!isLoading) {
       loadProfile();
     }
-  }, [isLoading]); 
+  }, [getProfile, isLoading, user]); 
 
   if (loading) {
     return (
@@ -75,7 +74,7 @@ const Profile: React.FC = () => {
       backgroundPosition: 'center',
       backgroundRepeat: 'no-repeat'
     }}>
-      <ProfileForm user={profileUser as User} />
+      <ProfileForm user={profileUser} />
     </div>
   );
 };

@@ -5,18 +5,23 @@ import styles from './Profile.module.css';
 import { User } from '../../types';
 
 interface ProfileFormProps {
-  user: User;
+  user: User | null;
 }
 
 interface Session {
   id: string;
   device_id?: string | null;
   device_label?: string | null;
-  user_agent: string;
+  user_agent?: string | null;
+  is_current?: boolean;
 }
 
 interface Profile {
-  display_name: string;
+  display_name?: string;
+  username?: string;
+  email?: string;
+  phone?: string;
+  id?: string | number;
 }
 
 interface Section {
@@ -25,7 +30,7 @@ interface Section {
 }
 
 const ProfileForm: React.FC<ProfileFormProps> = ({ user }) => {
-  const { getProfile } = useAuth();
+  const { getProfile, logout } = useAuth();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [activeSection, setActiveSection] = useState<string | null>(null);
   const [avatar, setAvatar] = useState<string | null>(null);
@@ -38,6 +43,11 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ user }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isMobile = window.innerWidth <= 768;
+  const profileDisplayName =
+    profile?.display_name?.trim() ||
+    profile?.username?.trim() ||
+    user?.username?.trim() ||
+    'Пользователь';
 
   useEffect(() => {
     const savedBackground = localStorage.getItem('profileBackground');
@@ -46,30 +56,31 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ user }) => {
     }
   }, []);
 
+  const loadSessions = async () => {
+    try {
+      const profileData: any = await getProfile();
+      const sessionsPayload = profileData?.sessions;
+      const allSessions = sessionsPayload?.sessions || sessionsPayload || [];
+      const normalizedSessions = Array.isArray(allSessions) ? allSessions : [];
+      setSessions(normalizedSessions);
+
+      const nextProfile = profileData?.profile || null;
+      setProfile(nextProfile);
+
+      const currentFromPayload =
+        normalizedSessions.find((session: Session) => session?.is_current)?.id ||
+        sessionsPayload?.current_session_id ||
+        profileData?.current_session_id ||
+        nextProfile?.current_session_id ||
+        '';
+      setCurrentSessionId(currentFromPayload);
+    } catch (error) {
+      console.error('Error loading sessions:', error);
+    }
+  };
+
   useEffect(() => {
-    const loadSessions = async () => {
-      try {
-        const profileData: any = await getProfile();
-        if (profileData.sessions) {
-          const allSessions = profileData.sessions.sessions || profileData.sessions || [];
-          setSessions(allSessions);
-
-          const profile = profileData.profile;
-          setProfile(profile);
-          console.log(profile);
-
-          const userProfile = localStorage.getItem('userProfile');
-          if (userProfile) {
-            const parsedProfile = JSON.parse(userProfile);
-            setCurrentSessionId(parsedProfile.current_session_id || '');
-          }
-        }
-      } catch (error) {
-        console.error('Error loading sessions:', error);
-      }
-    };
-
-    loadSessions();
+    void loadSessions();
   }, [getProfile]);
 
   const sections: Section[] = [
@@ -124,6 +135,21 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ user }) => {
     console.log('Profile data saved');
   };
 
+  const handleTerminateCurrentSession = async () => {
+    const shouldTerminate = window.confirm('Вы уверены, что хотите завершить текущую сессию?');
+    if (!shouldTerminate) {
+      return;
+    }
+
+    try {
+      await logout();
+      window.location.href = '/login';
+    } catch (error) {
+      console.error('Error terminating current session:', error);
+      alert('Ошибка при завершении текущей сессии');
+    }
+  };
+
   const handleRevokeSession = (sessionId: string) => {
     setSessionToRevoke(sessionId);
     setShowConfirmDialog(true);
@@ -135,10 +161,14 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ user }) => {
     try {
       const success = await apiService.revokeSpecificSession(sessionToRevoke);
       if (success) {
-        // Remove session from local state
-        setSessions(prevSessions => 
-          prevSessions.filter(session => session.id !== sessionToRevoke)
-        );
+        const stillAuthenticated = await apiService.checkAuth();
+        if (!stillAuthenticated) {
+          await logout();
+          window.location.href = '/login';
+          return;
+        }
+
+        await loadSessions();
       }
     } catch (error) {
       console.error('Error revoking session:', error);
@@ -170,9 +200,24 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ user }) => {
   const renderSectionContent = (sectionId: string) => {
     switch (sectionId) {
       case 'personalization':
+        const userFields: Array<{ label: string; value: string }> = [
+          { label: 'ID пользователя', value: String((profile as any)?.id || user?.id || '-') },
+          { label: 'Имя пользователя', value: String((profile as any)?.username || user?.username || '-') },
+          { label: 'Email', value: String((profile as any)?.email || user?.email || '-') },
+          { label: 'Телефон', value: String((profile as any)?.phone || user?.phone || '-') },
+          { label: 'Отображаемое имя', value: String(profile?.display_name || '-') },
+        ];
+
         return (
           <div>
             <h2 className={styles.panelHeader}>Персонализация</h2>
+            <div className={styles.formGroup}>
+              {userFields.map((field) => (
+                <p key={field.label}>
+                  <strong>{field.label}:</strong> {field.value}
+                </p>
+              ))}
+            </div>
             <div className={styles.formGroup}>
               <label className={styles.formLabel}>
                 Дата рождения:
@@ -251,7 +296,24 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ user }) => {
           </div>
         );
       case 'sessions':
-        const otherSessions = sessions.filter(session => session.id !== currentSessionId);
+        const hasCurrentMarker = Boolean(currentSessionId) || sessions.some((session) => Boolean(session.is_current));
+        const isCurrentSession = (session: Session) => {
+          if (session.is_current) {
+            return true;
+          }
+
+          if (currentSessionId) {
+            return session.id === currentSessionId;
+          }
+
+          if (!hasCurrentMarker && session.user_agent && session.user_agent === navigator.userAgent) {
+            return true;
+          }
+
+          return false;
+        };
+
+        const otherSessions = sessions.filter((session) => !isCurrentSession(session));
         
         return (
           <div>
@@ -268,7 +330,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ user }) => {
                 <div className={styles.sessionActions}>
                   <button 
                     className={`${styles.saveButton} ${styles.sessionActionButton}`}
-                    onClick={() => alert('Вы уверены, что хотите завершить эту сессию?')}
+                    onClick={handleTerminateCurrentSession}
                   >
                     Завершить
                   </button>
@@ -286,7 +348,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ user }) => {
                           {session.device_label || session.device_id || 'Неизвестное устройство'}
                         </p>
                         <p className={styles.sessionDeviceDetails}>
-                          {session.user_agent}
+                          {session.user_agent || 'Unknown user agent'}
                         </p>
                       </div>
                       <div className={styles.sessionActions}>
@@ -358,7 +420,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ user }) => {
               </div>
             </div>
             <div className={styles.username}>
-              {profile?.display_name || 'Пользователь'}
+              {profileDisplayName}
             </div>
             {/* Achievements section similar to home page */}
             <div className={styles.achievements}>

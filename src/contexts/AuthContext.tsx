@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import apiService from '../services/api';
 import { User, AuthResponse } from '../types';
+import { getDeviceLabel, getOrCreateDeviceId } from '../utils/device';
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -32,13 +33,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  useEffect(() => {
-    (async () => {
-      await checkAuth();
-    })();
-  }, []);
-
-  const checkAuth = async (): Promise<void> => {
+  const checkAuth = useCallback(async (): Promise<void> => {
     try {
       const isAuthenticatedFromServer = await apiService.checkAuth();
       
@@ -64,39 +59,58 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             setUser(null);
           }
         } else {
-          // Server says authenticated but no local data
-          setIsAuthenticated(false);
-          setUser(null);
+          // Server says authenticated but no local data; keep auth state and wait for fresh profile fetch
+          setIsAuthenticated(true);
         }
       }
     } catch (error) {
       console.error('Error checking auth:', error);
-      setIsAuthenticated(false);
-      setUser(null);
-      localStorage.removeItem('user');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userProfile');
+      // Network/transient errors should not force logout if local auth state exists.
+      const userData = localStorage.getItem('user');
+      if (userData) {
+        try {
+          const parsedUser = JSON.parse(userData);
+          setIsAuthenticated(true);
+          setUser(parsedUser);
+        } catch {
+          setIsAuthenticated(false);
+          setUser(null);
+        }
+      } else {
+        setIsAuthenticated(false);
+        setUser(null);
+      }
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
-  const getProfile = async (): Promise<User> => {
+  useEffect(() => {
+    void checkAuth();
+  }, [checkAuth]);
+
+  const getProfile = useCallback(async (): Promise<User> => {
     try {
       const profileData = await apiService.getProfile();
       localStorage.setItem('userProfile', JSON.stringify(profileData));
       return profileData;
     } catch (error: any) {
       throw error;
-    } finally {
-      setIsLoading(false);
     }
-  };
+  }, []);
 
-  const login = async (identifier: string, password: string, deviceId?: string, deviceLabel?: string) => {
+  const login = useCallback(async (identifier: string, password: string, deviceId?: string, deviceLabel?: string) => {
     try {
       setIsLoading(true);
-      const response: AuthResponse = await apiService.login(identifier, password, deviceId, deviceLabel);
+      const resolvedDeviceId = deviceId?.trim() || getOrCreateDeviceId();
+      const resolvedDeviceLabel = deviceLabel?.trim() || getDeviceLabel();
+
+      const response: AuthResponse = await apiService.login(
+        identifier,
+        password,
+        resolvedDeviceId,
+        resolvedDeviceLabel,
+      );
       
       localStorage.setItem('user', JSON.stringify(response.user));
       localStorage.setItem('token', JSON.stringify(response));
@@ -110,9 +124,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
-  const register = async (username: string, password: string, email: string, phone: string) => {
+  const register = useCallback(async (username: string, password: string, email: string, phone: string) => {
     try {
       setIsLoading(true);
       const response: any = await apiService.register(username, password, email, phone);
@@ -129,9 +143,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     try {
       await apiService.logout();
     } catch (error) {
@@ -143,7 +157,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setIsAuthenticated(false);
       setUser(null);
     }
-  };
+  }, []);
 
   const value = {
     isAuthenticated,

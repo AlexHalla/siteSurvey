@@ -1,13 +1,18 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, checkAuth } = useAuth();
+  const location = useLocation();
+
+  useEffect(() => {
+    void checkAuth();
+  }, [checkAuth, location.pathname]);
 
   if (isLoading) {
     return <div>Загрузка...</div>; // Можно добавить спиннер

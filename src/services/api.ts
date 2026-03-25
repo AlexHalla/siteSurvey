@@ -1,6 +1,4 @@
-// const API_BASE_URL = 'https://psycho-bff.setihome.ru'; // Replace with actual backend URL
-
-const API_BASE_URL = 'http://localhost:3002';
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002';
 
 class ApiService {
   baseURL: string;
@@ -71,16 +69,16 @@ class ApiService {
   }
 
   async getProfile(): Promise<any> {
-    try {
-      const res = await this.request('/personalization/profile', {
-        method: 'GET',
-      });
+    const response = await this.request('/personalization/profile', {
+      method: 'GET',
+    });
 
-      const data = await res.json();
-      return data;
-    } catch (err: any) {
-      throw new Error(`Failed to fetch profile with status ${err?.status}`);
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(`Failed to fetch profile with status ${response.status}: ${text}`);
     }
+
+    return await response.json();
   }
 
   async checkAuth(): Promise<boolean> {
