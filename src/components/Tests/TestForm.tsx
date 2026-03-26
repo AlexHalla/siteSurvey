@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import styles from './Test.module.css';
 import { Test } from '../../types';
 import apiService from '../../services/api';
+import { useAuth } from '../../contexts/AuthContext';
+import { canCreateSurvey } from '../../utils/roles';
 
 // Define types
 interface TestTopic {
@@ -21,6 +23,8 @@ interface Survey {
 
 const TestForm: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const canCreate = canCreateSurvey(user);
   
   // Topics data
   const topics: TestTopic[] = [
@@ -110,9 +114,11 @@ const TestForm: React.FC = () => {
               </div>
             ))}
           </div>
-          <button className={styles.createTestButton} onClick={handleCreateTest}>
-            + Создать тест
-          </button>
+          {canCreate && (
+            <button className={styles.createTestButton} onClick={handleCreateTest}>
+              + Создать тест
+            </button>
+          )}
         </div>
         <div className={styles.mainContent}>
           <div className={styles.testsList}>
@@ -139,9 +145,11 @@ const TestForm: React.FC = () => {
               </div>
             ))}
           </div>
-          <button className={styles.createTestButton} onClick={handleCreateTest}>
-            + Создать тест
-          </button>
+          {canCreate && (
+            <button className={styles.createTestButton} onClick={handleCreateTest}>
+              + Создать тест
+            </button>
+          )}
         </div>
         <div className={styles.mainContent}>
           <div className={styles.testsList}>
@@ -168,9 +176,11 @@ const TestForm: React.FC = () => {
             </div>
           ))}
         </div>
-        <button className={styles.createTestButton} onClick={handleCreateTest}>
-          + Создать тест
-        </button>
+        {canCreate && (
+          <button className={styles.createTestButton} onClick={handleCreateTest}>
+            + Создать тест
+          </button>
+        )}
       </div>
 
       {/* Main content area */}
@@ -182,9 +192,11 @@ const TestForm: React.FC = () => {
           {filteredTests.length === 0 ? (
             <div className={styles.emptyState}>
               <p>Пока нет тестов в этой категории.</p>
-              <button className={styles.createTestButton} onClick={handleCreateTest}>
-                Создать первый тест
-              </button>
+              {canCreate && (
+                <button className={styles.createTestButton} onClick={handleCreateTest}>
+                  Создать первый тест
+                </button>
+              )}
             </div>
           ) : (
             <div className={styles.testList}>

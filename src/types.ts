@@ -5,6 +5,11 @@ export interface User {
   email?: string;
   phone?: string;
   avatar?: string;
+  role?: string | string[];
+  roles?: string[];
+  realm_access?: {
+    roles?: string[];
+  };
 }
 
 
