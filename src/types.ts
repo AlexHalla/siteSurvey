@@ -113,6 +113,8 @@ export interface Test {
   name: string;  // Changed from title to name
   description: string;
   author: string;  // Added author field
+  shuffle?: boolean;
+  visible?: boolean;
   questions: TestQuestion[];
   scales: TestScale[];
   results: TestResultInterpretation[]; // For test creation

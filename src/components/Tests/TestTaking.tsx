@@ -1,9 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import styles from './TestTaking.module.css';
-import { Test, TestQuestion, TestScale } from '../../types';
+import { Test, TestQuestion } from '../../types';
 import apiService from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
+
+const shuffleQuestions = (questions: TestQuestion[]): TestQuestion[] => {
+  const shuffled = [...questions];
+
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+
+  return shuffled;
+};
 
 const TestTaking: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -16,6 +27,7 @@ const TestTaking: React.FC = () => {
   const [answers, setAnswers] = useState<{ [questionId: number]: number | number[] | string }>({});
   const [testCompleted, setTestCompleted] = useState<boolean>(false);
   const [testResults, setTestResults] = useState<[] | null>(null); // New state for backend results
+  const [surveySessionId, setSurveySessionId] = useState<string | null>(null);
   
   const { user } = useAuth();
 
@@ -31,7 +43,16 @@ const TestTaking: React.FC = () => {
       try {
         setLoading(true);
         const testData = await apiService.getSurveyById(id);
-        setTest(testData);
+        const preparedTest = testData?.shuffle
+          ? { ...testData, questions: shuffleQuestions(testData.questions ?? []) }
+          : testData;
+        setTest(preparedTest);
+
+        const session = await apiService.startSurveySession(id, {
+          platform: 'web',
+          user_agent: navigator.userAgent,
+        });
+        setSurveySessionId(session.session_id);
       } catch (err) {
         setError('Не удалось загрузить тест');
         //console.error('Error loading test:', err);
@@ -89,11 +110,12 @@ const TestTaking: React.FC = () => {
   };
 
   const submitTest = async () => {
-    if (!test || !id) return;
+    if (!test || !id || !surveySessionId) return;
     
     try {
       const resultData = {
         user_id: user?.id?.toString(),
+        session_id: surveySessionId,
         questions: Object.entries(answers)
           .filter(([_, answer]) => typeof answer === 'number' || Array.isArray(answer))
           .map(([questionId, answer]) => {

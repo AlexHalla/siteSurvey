@@ -139,6 +139,19 @@ class ApiService {
     return await response.json();
   }
 
+  async updateSurvey(id: string, surveyData: any): Promise<any> {
+    const response = await this.request(`/api/v1/survey-service/surveys/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(surveyData)
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to update survey with status ${response.status}`);
+    }
+
+    return await response.json();
+  }
+
   async saveSurveyResult(id: string, resultData: any): Promise<any> {
     const response = await this.request(`/api/v1/survey-service/surveys/${id}/results`, {
       method: 'POST',
@@ -147,6 +160,22 @@ class ApiService {
 
     if (!response.ok) {
       throw new Error(`Failed to save survey result with status ${response.status}, ${await response.text()}`);
+    }
+
+    return await response.json();
+  }
+
+  async startSurveySession(
+    id: string,
+    clientInfo?: { platform?: string; user_agent?: string },
+  ): Promise<{ session_id: string }> {
+    const response = await this.request(`/api/v1/survey-service/surveys/${id}/start`, {
+      method: 'POST',
+      body: JSON.stringify(clientInfo ? { client_info: clientInfo } : {}),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to start survey session with status ${response.status}`);
     }
 
     return await response.json();

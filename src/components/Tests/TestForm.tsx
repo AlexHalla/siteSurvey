@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './Test.module.css';
-import { Test } from '../../types';
 import apiService from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
 import { canCreateSurvey } from '../../utils/roles';
@@ -18,6 +17,7 @@ interface Survey {
   name: string;
   description: string;
   author: string;
+  visible?: boolean;
   questionsCount?: number;
 }
 
@@ -51,9 +51,10 @@ const TestForm: React.FC = () => {
         setLoading(true);
         // Fetch surveys from the backend API
         const surveys = await apiService.getSurveys();
+        const visibleSurveys = (surveys as Survey[]).filter((survey) => survey.visible !== false);
         
-        setTests(surveys);
-        setFilteredTests(surveys);
+        setTests(visibleSurveys);
+        setFilteredTests(visibleSurveys);
       } catch (err) {
         setError('Не удалось загрузить тесты');
         console.error('Error loading tests:', err);

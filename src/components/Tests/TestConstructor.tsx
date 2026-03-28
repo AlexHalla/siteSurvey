@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import styles from './TestConstructor.module.css';
-import { Test, TestQuestion, TestScale, TestResultInterpretation, TestQuestionOption } from '../../types';
+import { TestQuestion, TestScale, TestResultInterpretation } from '../../types';
 import apiService from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -12,6 +12,7 @@ const TestConstructor: React.FC = () => {
   // State for test properties
   const [name, setName] = useState('');  // Changed from title to name
   const [description, setDescription] = useState('');
+  const [shuffle, setShuffle] = useState<boolean>(false);
   const [scales, setScales] = useState<TestScale[]>([
     {
       id: 0,
@@ -52,6 +53,7 @@ const TestConstructor: React.FC = () => {
           
           setName(survey.name || '');
           setDescription(survey.description || '');
+          setShuffle(Boolean(survey.shuffle));
           
           if (survey.scales) {
             setScales(survey.scales);
@@ -308,6 +310,7 @@ const TestConstructor: React.FC = () => {
         description,
         author_id: user?.id,
         author: user?.username,
+        shuffle,
         scales,
         results,
         questions
@@ -315,7 +318,7 @@ const TestConstructor: React.FC = () => {
       
       if (id) {
         // Update existing survey
-        await apiService.createSurvey(surveyData);
+        await apiService.updateSurvey(id, surveyData);
         alert('Тест успешно обновлен!');
       } else {
         // Create new survey
@@ -382,6 +385,17 @@ const TestConstructor: React.FC = () => {
             placeholder="Введите описание теста"
             rows={3}
           />
+        </div>
+
+        <div className={styles.formGroup}>
+          <label className={styles.label} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <input
+              type="checkbox"
+              checked={shuffle}
+              onChange={(e) => setShuffle(e.target.checked)}
+            />
+            Перемешивать вопросы
+          </label>
         </div>
       </div>
       
