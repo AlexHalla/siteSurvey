@@ -1,6 +1,7 @@
 import { User } from '../types';
 
 const TEST_CREATOR_ROLES = new Set(['admin', 'company_rep', 'psychologist', 'moderator']);
+const ANALYTICS_ROLES = new Set(['admin', 'company_rep', 'psychologist', 'moderator']);
 
 function normalizeRoles(value: unknown): string[] {
   if (Array.isArray(value)) {
@@ -44,4 +45,9 @@ export function extractUserRoles(user: User | null): string[] {
 export function canCreateSurvey(user: User | null): boolean {
   const roles = extractUserRoles(user);
   return roles.some((role) => TEST_CREATOR_ROLES.has(role));
+}
+
+export function canViewSurveyAnalytics(user: User | null): boolean {
+  const roles = extractUserRoles(user);
+  return roles.some((role) => ANALYTICS_ROLES.has(role));
 }

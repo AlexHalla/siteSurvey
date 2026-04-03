@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import styles from './Header.module.css';
-import { User } from '../../types';
+import { canViewSurveyAnalytics } from '../../utils/roles';
 
 interface HeaderProps {
   // Add any props if needed in the future
@@ -12,6 +12,7 @@ const Header: React.FC<HeaderProps> = () => {
   const { isAuthenticated, user, logout } = useAuth();
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const canSeeAnalytics = canViewSurveyAnalytics(user);
 
   const handleLogout = () => {
     logout();
@@ -55,6 +56,15 @@ const Header: React.FC<HeaderProps> = () => {
     setIsMobileMenuOpen(false);
   };
 
+  const handleAnalyticsClick = () => {
+    if (isAuthenticated && canSeeAnalytics) {
+      navigate('/analytics');
+    } else if (!isAuthenticated) {
+      navigate('/login');
+    }
+    setIsMobileMenuOpen(false);
+  };
+
   return (
     <header className={`${styles.header} ${isMobileMenuOpen ? styles.mobileMenuOpen : ''}`}>
       <nav className={styles.nav}>
@@ -81,6 +91,13 @@ const Header: React.FC<HeaderProps> = () => {
               Тесты
             </Link>
           </li>
+          {canSeeAnalytics && (
+            <li>
+              <Link to="/analytics" className={styles.navLink} onClick={(e) => { e.preventDefault(); handleAnalyticsClick(); }}>
+                Аналитика
+              </Link>
+            </li>
+          )}
         </ul>
         
         <div className={`${styles.auth} ${isMobileMenuOpen ? styles.hidden : ''}`}>
@@ -147,6 +164,17 @@ const Header: React.FC<HeaderProps> = () => {
               Тесты
             </Link>
           </li>
+          {canSeeAnalytics && (
+            <li className={styles.mobileNavItem}>
+              <Link
+                to="/analytics"
+                className={styles.mobileNavLink}
+                onClick={(e) => { e.preventDefault(); handleAnalyticsClick(); }}
+              >
+                Аналитика
+              </Link>
+            </li>
+          )}
           {!isAuthenticated && (
             <li className={styles.mobileNavItem}>
               <Link 

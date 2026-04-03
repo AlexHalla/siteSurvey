@@ -7,6 +7,7 @@ import Tests from './pages/Tests';
 import Login from './pages/Login';
 import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute';
 import Profile from './pages/Profile';
+import SurveyAnalytics from './pages/SurveyAnalytics';
 import { AuthProvider } from './contexts/AuthContext';
 import './App.css';
 
@@ -28,6 +29,9 @@ function AppWrapper() {
     case '/tests/constructor':
       backgroundClass = 'testsBackground';
       break;
+    case '/analytics':
+      backgroundClass = 'testsBackground';
+      break;
     case '/profile':
       backgroundClass = 'profileBackground';
       break;
@@ -35,6 +39,8 @@ function AppWrapper() {
       if (location.pathname.startsWith('/tests/take/')) {
         backgroundClass = 'testsBackground';
       } else if (location.pathname.startsWith('/tests/')) {
+        backgroundClass = 'testsBackground';
+      } else if (location.pathname.startsWith('/analytics/')) {
         backgroundClass = 'testsBackground';
       } else {
         backgroundClass = 'defaultBackground';
@@ -71,6 +77,46 @@ function AppWrapper() {
                 <Profile />
               </ProtectedRoute>
             } 
+          />
+          <Route
+            path="/analytics"
+            element={
+              <ProtectedRoute
+                allowedRoles={['psychologist', 'company_rep', 'moderator', 'admin']}
+              >
+                <SurveyAnalytics />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/analytics/:surveyId"
+            element={
+              <ProtectedRoute
+                allowedRoles={['psychologist', 'company_rep', 'moderator', 'admin']}
+              >
+                <SurveyAnalytics />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/analytics/:surveyId/:userId"
+            element={
+              <ProtectedRoute
+                allowedRoles={['psychologist', 'company_rep', 'moderator', 'admin']}
+              >
+                <SurveyAnalytics />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/analytics/:surveyId/:userId/:attemptId"
+            element={
+              <ProtectedRoute
+                allowedRoles={['psychologist', 'company_rep', 'moderator', 'admin']}
+              >
+                <SurveyAnalytics />
+              </ProtectedRoute>
+            }
           />
         </Routes>
       </main>

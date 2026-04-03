@@ -82,7 +82,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister }) => {
         }, 1500);
 
       } else {
-        setErrors({ submit: 'Неверные учетные данные' });
+        setErrors({ submit: result.error || 'Неверные учетные данные' });
       }
 
     } catch (error) {

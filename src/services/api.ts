@@ -37,7 +37,19 @@ class ApiService {
     });
 
     if (!response.ok) {
-      throw new Error(`Login failed with status ${response.status}`);
+      const rawBody = await response.text();
+      let message = `Login failed with status ${response.status}`;
+
+      try {
+        const parsed = JSON.parse(rawBody);
+        message = parsed?.message || parsed?.error || rawBody || message;
+      } catch {
+        if (rawBody) {
+          message = rawBody;
+        }
+      }
+
+      throw new Error(message);
     }
 
     const result = await response.json();
@@ -188,6 +200,42 @@ class ApiService {
 
     if (!response.ok) {
       throw new Error(`Failed to fetch survey results with status ${response.status}`);
+    }
+
+    return await response.json();
+  }
+
+  async getMySurveyAnalytics(): Promise<any> {
+    const response = await this.request('/api/v1/survey-analytics/surveys', {
+      method: 'GET'
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch analytics surveys with status ${response.status}`);
+    }
+
+    return await response.json();
+  }
+
+  async getSurveyRespondents(surveyId: string): Promise<any> {
+    const response = await this.request(`/api/v1/survey-analytics/surveys/${surveyId}/respondents`, {
+      method: 'GET'
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch survey respondents with status ${response.status}`);
+    }
+
+    return await response.json();
+  }
+
+  async getSurveyRespondentAttempts(surveyId: string, userId: string): Promise<any> {
+    const response = await this.request(`/api/v1/survey-analytics/surveys/${surveyId}/respondents/${userId}/attempts`, {
+      method: 'GET'
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch respondent attempts with status ${response.status}`);
     }
 
     return await response.json();
