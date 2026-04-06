@@ -100,6 +100,7 @@ export interface TestQuestion {
   type: 'single' | 'multiple' | 'text';
   scales: number[];  // Changed from scaleId to scales array
   options?: TestQuestionOption[];
+  answerStyle?: 'default' | 'bubbles';  // Visual style for answers
 }
 
 // // Test result from backend - new format
@@ -114,6 +115,8 @@ export interface Test {
   description: string;
   author: string;  // Added author field
   shuffle?: boolean;
+  /** Игровой фон при прохождении (падающие облачка и т.п.) */
+  game_background?: boolean;
   visible?: boolean;
   questions: TestQuestion[];
   scales: TestScale[];

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import styles from './TestTaking.module.css';
+import GameBackground from './GameBackground';
+import BubbleAnswer from './BubbleAnswer';
 import { Test, TestQuestion } from '../../types';
 import apiService from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
@@ -43,9 +45,14 @@ const TestTaking: React.FC = () => {
       try {
         setLoading(true);
         const testData = await apiService.getSurveyById(id);
+        // Ensure each question has answerStyle field
+        const preparedQuestions = (testData.questions || []).map((q: any) => ({
+          ...q,
+          answerStyle: q.answerStyle || 'default'
+        }));
         const preparedTest = testData?.shuffle
-          ? { ...testData, questions: shuffleQuestions(testData.questions ?? []) }
-          : testData;
+          ? { ...testData, questions: shuffleQuestions(preparedQuestions) }
+          : { ...testData, questions: preparedQuestions };
         setTest(preparedTest);
 
         const session = await apiService.startSurveySession(id, {
@@ -273,6 +280,7 @@ const TestTaking: React.FC = () => {
 
   return (
     <div className={styles.container}>
+      {test.game_background && <GameBackground />}
       <div className={styles.testHeader}>
         <h1 className={styles.testTitle}>{test.name}</h1>
         <p className={styles.testDescription}>{test.description}</p>
@@ -310,25 +318,43 @@ const TestTaking: React.FC = () => {
           </div>
         ) : (
           <div className={styles.optionsContainer}>
-            {currentQuestion.options?.map((option) => {
-              const isSelected = currentQuestion.type === 'multiple' 
-                ? Array.isArray(answers[currentQuestion.id]) && (answers[currentQuestion.id] as number[]).includes(option.id)
-                : answers[currentQuestion.id] === option.id;
-              
-              return (
-                <div 
-                  key={option.id} 
-                  className={`${styles.option} ${isSelected ? styles.selected : ''}`}
-                  onClick={() => handleAnswerSelect(
-                    currentQuestion.id, 
-                    option.id, 
-                    currentQuestion.type === 'multiple'
-                  )}
-                >
-                  <div className={styles.optionText}>{option.text}</div>
-                </div>
-              );
-            })}
+            {currentQuestion.answerStyle === 'bubbles' ? (
+              // Render bubble-style answers
+              <BubbleAnswer
+                options={currentQuestion.options || []}
+                selectedId={
+                  currentQuestion.type === 'multiple'
+                    ? null // Multiple selection not supported for bubbles yet
+                    : (answers[currentQuestion.id] != null ? (answers[currentQuestion.id] as number) : null)
+                }
+                onSelect={(optionId) => handleAnswerSelect(
+                  currentQuestion.id,
+                  optionId,
+                  currentQuestion.type === 'multiple'
+                )}
+              />
+            ) : (
+              // Render default button-style answers
+              currentQuestion.options?.map((option) => {
+                const isSelected = currentQuestion.type === 'multiple' 
+                  ? Array.isArray(answers[currentQuestion.id]) && (answers[currentQuestion.id] as number[]).includes(option.id)
+                  : answers[currentQuestion.id] === option.id;
+                
+                return (
+                  <div 
+                    key={option.id} 
+                    className={`${styles.option} ${isSelected ? styles.selected : ''}`}
+                    onClick={() => handleAnswerSelect(
+                      currentQuestion.id, 
+                      option.id, 
+                      currentQuestion.type === 'multiple'
+                    )}
+                  >
+                    <div className={styles.optionText}>{option.text}</div>
+                  </div>
+                );
+              })
+            )}
           </div>
         )}
       </div>

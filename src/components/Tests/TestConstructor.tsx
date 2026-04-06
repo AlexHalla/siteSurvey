@@ -13,6 +13,7 @@ const TestConstructor: React.FC = () => {
   const [name, setName] = useState('');  // Changed from title to name
   const [description, setDescription] = useState('');
   const [shuffle, setShuffle] = useState<boolean>(false);
+  const [gameBackground, setGameBackground] = useState<boolean>(false);
   const [scales, setScales] = useState<TestScale[]>([
     {
       id: 0,
@@ -54,6 +55,7 @@ const TestConstructor: React.FC = () => {
           setName(survey.name || '');
           setDescription(survey.description || '');
           setShuffle(Boolean(survey.shuffle));
+          setGameBackground(Boolean(survey.game_background));
           
           if (survey.scales) {
             setScales(survey.scales);
@@ -64,7 +66,12 @@ const TestConstructor: React.FC = () => {
           }
           
           if (survey.questions) {
-            setQuestions(survey.questions);
+            // Ensure each question has answerStyle field
+            const questionsWithStyle = survey.questions.map((q: any) => ({
+              ...q,
+              answerStyle: q.answerStyle || 'default'
+            }));
+            setQuestions(questionsWithStyle);
           }
         } catch (err) {
           setError('Не удалось загрузить тест для редактирования');
@@ -162,6 +169,12 @@ const TestConstructor: React.FC = () => {
       ];
     }
     
+    setQuestions(updatedQuestions);
+  };
+
+  const handleAnswerStyleChange = (index: number, style: 'default' | 'bubbles') => {
+    const updatedQuestions = [...questions];
+    updatedQuestions[index].answerStyle = style;
     setQuestions(updatedQuestions);
   };
 
@@ -311,6 +324,7 @@ const TestConstructor: React.FC = () => {
         author_id: user?.id,
         author: user?.username,
         shuffle,
+        game_background: gameBackground,
         scales,
         results,
         questions
@@ -395,6 +409,17 @@ const TestConstructor: React.FC = () => {
               onChange={(e) => setShuffle(e.target.checked)}
             />
             Перемешивать вопросы
+          </label>
+        </div>
+
+        <div className={styles.formGroup}>
+          <label className={styles.label} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <input
+              type="checkbox"
+              checked={gameBackground}
+              onChange={(e) => setGameBackground(e.target.checked)}
+            />
+            Игровой фон при прохождении (падающие облачка, клик — исчезают)
           </label>
         </div>
       </div>
@@ -565,6 +590,25 @@ const TestConstructor: React.FC = () => {
               <option value="text">Ответ текстом</option>
             </select>
           </div>
+          
+          {question.type !== 'text' && (
+            <div className={styles.formGroup}>
+              <label className={styles.label}>Стиль отображения ответов</label>
+              <select
+                className={styles.select}
+                value={question.answerStyle || 'default'}
+                onChange={(e) => handleAnswerStyleChange(questionIndex, e.target.value as 'default' | 'bubbles')}
+              >
+                <option value="default">Обычные кнопки</option>
+                <option value="bubbles">Мыльные пузыри 🫧</option>
+              </select>
+              <small style={{ color: '#666', marginTop: '0.25rem', display: 'block' }}>
+                {question.answerStyle === 'bubbles' 
+                  ? 'При клике на пузырь он лопается с анимацией' 
+                  : 'Стандартные кнопки для выбора ответа'}
+              </small>
+            </div>
+          )}
           
           {question.type !== 'text' && question.options && (
             <div className={styles.formGroup}>
