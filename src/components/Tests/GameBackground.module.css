@@ -1,0 +1,59 @@
+.layer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: visible;
+  pointer-events: none;
+  z-index: 0;
+  /* Добавляем небольшой отступ, чтобы облака не появлялись прямо у края */
+  padding: 0 2%;
+  box-sizing: border-box;
+}
+
+.cloud {
+  position: absolute;
+  top: -12%;
+  left: var(--left);
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: transparent;
+  pointer-events: auto;
+  cursor: pointer;
+  font-size: var(--size);
+  line-height: 1;
+  animation-name: cloudFall;
+  animation-duration: var(--duration);
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+  user-select: none;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.2));
+  opacity: 0.92;
+  transition: transform 0.2s ease-out, opacity 0.2s ease-out;
+}
+
+.cloud:hover {
+  transform: scale(1.15);
+  opacity: 1;
+}
+
+.cloud:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.5);
+  outline-offset: 2px;
+}
+
+.cloudGlyph {
+  display: block;
+  transform-origin: center;
+}
+
+@keyframes cloudFall {
+  from {
+    transform: translate3d(0, 0, 0) rotate(-2deg);
+  }
+  to {
+    transform: translate3d(var(--drift), 125vh, 0) rotate(3deg);
+  }
+}

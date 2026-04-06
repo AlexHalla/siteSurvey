@@ -1,0 +1,209 @@
+.bubbleContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  justify-content: center;
+  padding: 2rem 1rem;
+}
+
+.bubble {
+  position: relative;
+  min-width: 140px;
+  max-width: 280px;
+  padding: 1.5rem 2rem;
+  border: none;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 30% 30%,
+    rgba(255, 255, 255, 0.9) 0%,
+    hsla(var(--bubble-hue, 220), 70%, 75%, 0.6) 40%,
+    hsla(var(--bubble-hue, 220), 70%, 60%, 0.4) 70%,
+    hsla(var(--bubble-hue, 220), 70%, 50%, 0.2) 100%
+  );
+  backdrop-filter: blur(8px);
+  box-shadow: 
+    inset 0 0 20px rgba(255, 255, 255, 0.5),
+    inset 10px 10px 20px rgba(255, 255, 255, 0.3),
+    inset -10px -10px 20px rgba(0, 0, 0, 0.1),
+    0 8px 32px hsla(var(--bubble-hue, 220), 70%, 50%, 0.3),
+    0 2px 8px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  animation: bubbleFloat 3s ease-in-out infinite;
+  animation-delay: calc(var(--index, 0) * 0.2s);
+  overflow: hidden;
+}
+
+.bubble::before {
+  content: '';
+  position: absolute;
+  top: 15%;
+  left: 20%;
+  width: 30%;
+  height: 20%;
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(255, 255, 255, 0.8) 0%,
+    rgba(255, 255, 255, 0) 70%
+  );
+  transform: rotate(-45deg);
+  pointer-events: none;
+}
+
+.bubble::after {
+  content: '';
+  position: absolute;
+  bottom: 20%;
+  right: 25%;
+  width: 15%;
+  height: 10%;
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(255, 255, 255, 0.6) 0%,
+    rgba(255, 255, 255, 0) 70%
+  );
+  transform: rotate(-45deg);
+  pointer-events: none;
+}
+
+.bubble:hover {
+  transform: scale(1.08) translateY(-5px);
+  box-shadow: 
+    inset 0 0 25px rgba(255, 255, 255, 0.6),
+    inset 10px 10px 20px rgba(255, 255, 255, 0.4),
+    inset -10px -10px 20px rgba(0, 0, 0, 0.1),
+    0 12px 40px hsla(var(--bubble-hue, 220), 70%, 50%, 0.4),
+    0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.bubble:active {
+  transform: scale(0.95);
+  animation: bubblePop 0.3s ease-out;
+}
+
+.bubble.selected {
+  background: radial-gradient(
+    circle at 30% 30%,
+    rgba(255, 255, 255, 0.95) 0%,
+    hsla(var(--bubble-hue, 220), 80%, 65%, 0.7) 40%,
+    hsla(var(--bubble-hue, 220), 80%, 55%, 0.5) 70%,
+    hsla(var(--bubble-hue, 220), 80%, 45%, 0.3) 100%
+  );
+  box-shadow: 
+    inset 0 0 30px rgba(255, 255, 255, 0.7),
+    inset 10px 10px 20px rgba(255, 255, 255, 0.5),
+    inset -10px -10px 20px rgba(0, 0, 0, 0.1),
+    0 0 40px hsla(var(--bubble-hue, 220), 80%, 50%, 0.6),
+    0 8px 32px rgba(0, 0, 0, 0.2);
+  animation: bubbleSelected 2s ease-in-out infinite;
+}
+
+.bubble.selected .bubbleText {
+  color: #1a1a2e;
+  font-weight: 600;
+  text-shadow: 0 1px 3px rgba(255, 255, 255, 0.9);
+}
+
+.bubbleText {
+  position: relative;
+  z-index: 1;
+  color: #2c3e50;
+  font-size: 1rem;
+  font-weight: 500;
+  text-align: center;
+  line-height: 1.4;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+  pointer-events: none;
+}
+
+.checkmark {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  font-weight: bold;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4), 0 0 0 2px rgba(255, 255, 255, 0.8);
+  z-index: 2;
+  opacity: 1;
+  transform: scale(1) rotate(0deg);
+  transition: all 0.2s ease-out;
+}
+
+.checkmarkAnimate {
+  animation: checkmarkPop 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+}
+
+@keyframes bubbleFloat {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(2deg);
+  }
+}
+
+@keyframes bubbleSelected {
+  0%, 100% {
+    transform: scale(1) translateY(0);
+  }
+  50% {
+    transform: scale(1.05) translateY(-5px);
+  }
+}
+
+@keyframes bubblePop {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(0.95);
+    opacity: 1;
+  }
+}
+
+@keyframes checkmarkPop {
+  0% {
+    transform: scale(0) rotate(-180deg);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2) rotate(10deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .bubbleContainer {
+    gap: 1rem;
+    padding: 1.5rem 0.5rem;
+  }
+  
+  .bubble {
+    min-width: 120px;
+    max-width: 100%;
+    padding: 1.2rem 1.5rem;
+  }
+  
+  .bubbleText {
+    font-size: 0.9rem;
+  }
+}
